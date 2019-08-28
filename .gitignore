@@ -63,3 +63,4 @@ typings/
 config
 .DS_Store
 _DS_Store
+package-lock.json
