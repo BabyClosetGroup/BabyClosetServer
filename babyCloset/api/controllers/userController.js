@@ -55,5 +55,42 @@ module.exports = {
                 }
             }
         }
+    },
+    SignIn: async(req, res) => {
+        try{
+            const getUserWithSameIdQuery = 'SELECT userIdx, userId, username, salt, password, nickname FROM user WHERE userId = ?';
+            let resultUser = await db.queryParam_Arr(getUserWithSameIdQuery, [req.body.id] );
+            if(resultUser.length == 0)
+            {
+                res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.ID_MISS_MATCH));
+            }
+            else{
+                const salt = resultUser[0].salt;
+                const password = await crypto.pbkdf2(req.body.password, salt, 1000, 32, 'SHA512');
+                if(resultUser[0].password == password.toString('base64'))
+                {
+                    const User = {
+                        userIdx: resultUser[0].userIdx,
+                        nickname: resultUser[0].nickname
+                    }
+                    const token = jwt.sign(User).accessToken
+                    const responseData = {
+                        userIdx: resultUser[0].userIdx,
+                        id: resultUser[0].userId,
+                        name: resultUser[0].username,
+                        nickname: resultUser[0].nickname,
+                        token
+                    }
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.LOGIN_SUCCESS, responseData));
+                }
+                else{
+                    res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.PASSWORD_MISS_MATCH));
+                } 
+            }
+        }
+        catch(err){
+            console.log(err)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.USER_SELECT_FAIL));
+        }
     }
 }

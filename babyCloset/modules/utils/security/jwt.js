@@ -11,12 +11,11 @@ module.exports = {
     sign: (user) => {
         const payload = {
             userIdx: user.userIdx,
-            email: user.email,
-            isAdmined: user.isAdmined
+            nickname: user.nickname
         }
         const result = {
-            accessToken: jwt.sign(payload, secretOrPrivateKey, options),
-            refreshToken: randToken.uid(256) //발급받은 refreshToken은 반드시 디비에 저장해야 한다.
+            accessToken: jwt.sign(payload, secretOrPrivateKey, options)
+            // refreshToken: randToken.uid(256) //발급받은 refreshToken은 반드시 디비에 저장해야 한다.
         }
         //refreshToken을 만들 때에도 다른 키를 쓰는게 좋다.
         //대부분 2주로 만든다.
