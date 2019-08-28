@@ -39,7 +39,7 @@ module.exports = {
                     const salt = await crypto.randomBytes(32);
                     const password = await crypto.pbkdf2(req.body.password, salt.toString('base64'), 1000, 32, 'SHA512');
                     const insertUserQuery = 'INSERT INTO user (username, userId, password, salt, nickname) VALUES (?, ?, ?, ?, ?)';
-                    const insertUserResult = await db.queryParam_Parse(insertUserQuery,
+                    const insertUserResult = await db.queryParam_Arr(insertUserQuery,
                         [req.body.name, req.body.id, password.toString('base64'), salt.toString('base64'), req.body.nickname]);
                     if (!insertUserResult) {
                         res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.USER_INSERT_FAIL));
