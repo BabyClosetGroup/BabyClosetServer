@@ -1,7 +1,7 @@
 module.exports = {
     NULL_VALUE: "필요한 값이 없습니다.",
     OUT_OF_VALUE: "파라미터 값이 잘못 되었습니다.",
-    CREATED_USER: "회원가입 성공",
+    USER_INSERT_SUCCESS: "회원가입 성공",
     FAIL_CREATED_USER: "회원 가입 실패",
     READ_USER: "로그인 성공",
     READ_USER_INFO: "유저 정보 조회 성공",
@@ -10,7 +10,8 @@ module.exports = {
     FAIL_UPDATED_USER: "회원 정보 수정 실패",
     REMOVED_USER: "회원 탈퇴 성공",
     FAIL_REMOVED_USER: "회원 탈퇴 실패",
-    ALREADY_USER: "존재하는 유저 id 입니다.",
+    USER_ALREADY_EXISTS: "존재하는 유저 id입니다.",
+    NICKNAME_ALREADY_EXISTS: "존재하는 유저 닉네임입니다.",
     NO_USER: "존재하지 않는 유저 id 입니다.",
     MISS_MATCH_PW: "비밀번호가 일치하지 않습니다",
     WRONG_PW: "비밀번호가 틀렸습니다",
