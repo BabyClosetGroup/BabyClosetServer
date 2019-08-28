@@ -9,7 +9,7 @@ const jwt = require('../../modules/utils/security/jwt');
 
 module.exports = {
     SignUp: async(req, res) => {
-        let check = true;
+        let duplicate = false;
         if(!req.body.id || !req.body.name || !req.body.password || !req.body.nickname)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
@@ -20,21 +20,27 @@ module.exports = {
             if (!getAllUserResult) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.USER_SELECT_FAIL));
             } else {
-                getAllUserResult.forEach((user) => {
+                for(i=0; i<getAllUserResult.length ;i++)
+                {
+                    user = getAllUserResult[i];
                     if(user.userId == req.body.id)
                     {
                         res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.USER_ALREADY_EXISTS));
-                        check = false;
+                        duplicate = true;
+                        break;
                     }
-                })
-                getAllUserResult.forEach((user) => {
+                }
+                for(i=0; i<getAllUserResult.length ;i++)
+                {
+                    user = getAllUserResult[i];
                     if(user.nickname == req.body.nickname)
                     {
                         res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NICKNAME_ALREADY_EXISTS));
-                        check = false;
+                        duplicate = true;
+                        break;
                     }
-                })
-                if(check)
+                }
+                if(!duplicate)
                 {
                     const salt = await crypto.randomBytes(32);
                     const password = await crypto.pbkdf2(req.body.password, salt.toString('base64'), 1000, 32, 'SHA512');
