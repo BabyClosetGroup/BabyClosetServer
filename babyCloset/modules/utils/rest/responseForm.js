@@ -1,4 +1,4 @@
-const authUtil = {
+const responseForm = {
     successTrue: (status, message, data) => {
         return {
             status: status,
@@ -15,4 +15,4 @@ const authUtil = {
         }
     },
 }
-module.exports = authUtil
+module.exports = responseForm
