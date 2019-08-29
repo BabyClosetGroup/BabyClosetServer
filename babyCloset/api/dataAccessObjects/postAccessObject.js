@@ -43,10 +43,12 @@ module.exports = {
                     ON postAreaCategory.postIdx = post.postIdx
                     WHERE post.deadline <= curdate() + interval 4 day)
                     AS postArea
-            ON postArea.postIdx = postImage.postIdx)
+            ON postArea.postIdx = postImage.postIdx
+            GROUP BY postArea.postIdx)
             AS postAreaImage
         ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx order by deadline limit 3`
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;
     }
+
 }
