@@ -4,6 +4,7 @@ const router = express.Router();
 const PostController = require('../controllers/postController');
 const upload = require('../../config/multer')
 
+router.get('/main', PostController.mainPost);
 router.post('/', upload.array('postImages'), authUtil.isLoggedIn, PostController.RegisterPost);
 
 module.exports = router;

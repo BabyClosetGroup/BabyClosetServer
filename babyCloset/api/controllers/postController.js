@@ -1,7 +1,7 @@
 const resForm = require('../../modules/utils/rest/responseForm');
 const statusCode = require('../../modules/utils/rest/statusCode');
 const resMessage = require('../../modules/utils/rest/responseMessage');
-const postDAO = require('../dataAcessObjects/postDAO');
+const postAccessObject = require('../dataAccessObjects/postAccessObject');
 const moment = require('moment');
 
 module.exports = {
@@ -24,7 +24,7 @@ module.exports = {
         else
         {
             deadline = moment().add(req.body.deadline.substring(0,1), 'days').format('YYYY-MM-DD');
-            const insertTransaction = await postDAO.RegisterPost(postImages, postTitle, postContent, deadline, createdTime, userIdx, areaName, ageName, clothName)
+            const insertTransaction = await postAccessObject.RegisterPost(postImages, postTitle, postContent, deadline, createdTime, userIdx, areaName, ageName, clothName)
             if (!insertTransaction) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('게시물')));
                 } else {
@@ -33,4 +33,6 @@ module.exports = {
         }
     },
         // 받아야 할 정보 이미지(여러 개), 카테고리(자치구, 나이, 옷 종류), 마감기한, 제목, 내용 
+    mainPost : async(req, res) => {
+    }
 }

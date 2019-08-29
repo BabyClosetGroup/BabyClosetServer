@@ -27,5 +27,5 @@ module.exports = {
                 await connection.query(insertPostClothCategoryQuery, [postIdx, clothCategoryIdx]);
                 });
             return insertTransaction;
-    }
+    },
 }
