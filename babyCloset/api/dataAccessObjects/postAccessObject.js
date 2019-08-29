@@ -46,9 +46,31 @@ module.exports = {
             ON postArea.postIdx = postImage.postIdx
             GROUP BY postArea.postIdx)
             AS postAreaImage
-        ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx order by deadline limit 3`
+        ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
+        ORDER BY deadline LIMIT 3`
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;
+    },
+    GetRecentPost : async () => {
+        const selectRecentPostQuery = `
+        SELECT
+        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.createdTime, postAreaImage.postImage ,areaCategory.areaName
+        FROM areaCategory
+        JOIN
+            (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postImage.postImage, postArea.areaCategoryIdx
+            FROM postImage
+            JOIN
+                (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
+                FROM BabyCloset.postAreaCategory
+                JOIN BabyCloset.post
+                ON BabyCloset.postAreaCategory.postIdx = BabyCloset.post.postIdx)
+                AS postArea
+            On postArea.postIdx = postImage.postIdx
+            GROUP BY postArea.postIdx)
+            AS postAreaImage
+        On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
+        ORDER BY createdTime DESC LIMIT 4;`
+        const selectRecentPostResult = await db.queryParam_None(selectRecentPostQuery);
+        return selectRecentPostResult;
     }
-
 }
