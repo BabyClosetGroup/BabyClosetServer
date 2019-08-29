@@ -31,19 +31,21 @@ module.exports = {
     GetDeadLinePost : async () => {
         const selectDeadlinePostQuery = `
         SELECT
-        postWithArea.postIdx, postWithArea.postTitle, postWithArea.deadline, areaCategory.areaName 
+        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.deadline, postAreaImage.postImage, areaCategory.areaName
         FROM areaCategory
         JOIN
-            (
-                SELECT
-                post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
-                FROM postAreaCategory
-                JOIN post
-                ON postAreaCategory.postIdx = post.postIdx 
-                WHERE post.deadline <= curdate() + interval 4 day
-            ) AS postWithArea
-        ON postWithArea.areaCategoryIdx = areaCategory.areaCategoryIdx
-        ORDER BY deadline LIMIT 3;`
+            (SELECT postArea.postIdx, postArea.postTitle, postArea.deadline, postImage.postImage, postArea.areaCategoryIdx
+            FROM postImage
+            JOIN
+                (SELECT post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
+                    FROM postAreaCategory
+                    JOIN post
+                    ON postAreaCategory.postIdx = post.postIdx
+                    WHERE post.deadline <= curdate() + interval 4 day)
+                    AS postArea
+            ON postArea.postIdx = postImage.postIdx)
+            AS postAreaImage
+        ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx order by deadline limit 3`
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;
     }
