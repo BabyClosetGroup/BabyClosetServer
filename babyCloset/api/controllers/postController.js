@@ -12,8 +12,12 @@ module.exports = {
         const postTitle = req.body.title;
         const postContent = req.body.content;
         const createdTime = moment().format('YYYY-MM-DD hh:mm:ss');
+        const areaName = req.body.areaCategory;
+        const ageName = req.body.ageCategory;
+        const clothName = req.body.clothCategory;
         console.log(postImages);
-        if(!deadline || !postTitle || !postContent || !postImages || postImages.length == 0)
+        if(!deadline || !postTitle || !postContent || !postImages || postImages.length == 0 ||
+            !areaName || !ageName|| !clothName)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
@@ -23,11 +27,27 @@ module.exports = {
             const insertPostQuery = 'INSERT INTO post (postTitle, postContent, deadline, createdTime, userIdx)' +
             ' VALUES (?, ?, ?, ?, ?)';
             const insertPostImageQuery = 'INSERT INTO postImage (postImage, postIdx) VALUES (?, ?)';
+            const insertAreaCategoryQuery = 'INSERT INTO areaCategory (areaName) VALUES (?)';
+            const insertAgeCategoryQuery = 'INSERT INTO ageCategory (ageName) VALUES (?)';
+            const insertClothCategoryQuery = 'INSERT INTO clothCategory (clothName) VALUES (?)';
+            const insertPostAreaCategoryQuery = 'INSERT INTO postAreaCategory (postIdx, areaCategoryIdx) VALUES (?, ?)';
+            const insertPostAgeCategoryQuery = 'INSERT INTO postAgeCategory (postIdx, ageCategoryIdx) VALUES (?, ?)';
+            const insertPostClothCategoryQuery = 'INSERT INTO postClothCategory (postIdx, clothCategoryIdx) VALUES (?, ?)';
             const insertTransaction = await db.Transaction(async(connection) => {
                 const insertPostResult = await connection.query(insertPostQuery, [postTitle, postContent, deadline, createdTime, userIdx]);
-            for(i=0; i<postImages.length ;i++)
-                await connection.query(insertPostImageQuery, [postImages[i].location, insertPostResult.insertId]);
-            });
+                const postIdx = insertPostResult.insertId;
+                for(i=0; i<postImages.length ;i++)
+                    await connection.query(insertPostImageQuery, [postImages[i].location, postIdx]);
+                const insertAreaCategoryResult = await connection.query(insertAreaCategoryQuery, [areaName]);
+                const insertAgeCategoryResult = await connection.query(insertAgeCategoryQuery, [ageName]);
+                const insertClothCategoryResult = await connection.query(insertClothCategoryQuery, [clothName]);
+                const areaCategoryIdx = insertAreaCategoryResult.insertId;
+                const ageCategoryIdx = insertAgeCategoryResult.insertId;
+                const clothCategoryIdx = insertClothCategoryResult.insertId;
+                await connection.query(insertPostAreaCategoryQuery, [postIdx, areaCategoryIdx]);
+                await connection.query(insertPostAgeCategoryQuery, [postIdx, ageCategoryIdx]);
+                await connection.query(insertPostClothCategoryQuery, [postIdx, clothCategoryIdx]);
+                });
             if (!insertTransaction) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('게시물')));
                 } else {
