@@ -28,4 +28,23 @@ module.exports = {
                 });
             return insertTransaction;
     },
+    GetDeadLinePost : async () => {
+        const selectDeadlinePostQuery = `
+        SELECT
+        postWithArea.postIdx, postWithArea.postTitle, postWithArea.deadline, areaCategory.areaName 
+        FROM areaCategory
+        JOIN
+            (
+                SELECT
+                post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
+                FROM postAreaCategory
+                JOIN post
+                ON postAreaCategory.postIdx = post.postIdx 
+                WHERE post.deadline <= curdate() + interval 4 day
+            ) AS postWithArea
+        ON postWithArea.areaCategoryIdx = areaCategory.areaCategoryIdx
+        ORDER BY deadline LIMIT 3;`
+        const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
+        return selectDeadlinePostResult;
+    }
 }
