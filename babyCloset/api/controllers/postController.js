@@ -78,5 +78,25 @@ module.exports = {
                 allPost : filteredAllPost
             }));
         }
+    },
+    deadlinePost: async(req, res) => {
+        const getDeadlinePost = await postAccessObject.GetDeadLinePostWithPagination((parseInt(req.params.pagination)-1)*8);
+        if(!getDeadlinePost)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            const filteredDeadlinePost = getDeadlinePost.map(post => {
+                if(post.postTitle.length > 12)
+                    post.postTitle = post.postTitle.substring(0, 12) + "..";
+                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
+                return post
+            })
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+            {
+                deadlinePost : filteredDeadlinePost
+            }));
+        }
     }
 }

@@ -94,5 +94,28 @@ module.exports = {
         ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`
         const selectAllPostResult = await db.queryParam_None(selectAllPostQuery);
         return selectAllPostResult;
-    }
+    },
+    GetDeadLinePostWithPagination : async (offset) => {
+        const selectDeadlinePostQuery = `
+        SELECT
+        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.deadline, postAreaImage.postImage, areaCategory.areaName
+        FROM areaCategory
+        JOIN
+            (SELECT postArea.postIdx, postArea.postTitle, postArea.deadline, postImage.postImage, postArea.areaCategoryIdx
+            FROM postImage
+            JOIN
+                (SELECT post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
+                    FROM postAreaCategory
+                    JOIN post
+                    ON postAreaCategory.postIdx = post.postIdx
+                    WHERE post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day)
+                    AS postArea
+            ON postArea.postIdx = postImage.postIdx
+            GROUP BY postArea.postIdx)
+            AS postAreaImage
+        ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
+        ORDER BY deadline LIMIT 8 OFFSET ${offset}`
+        const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
+        return selectDeadlinePostResult;
+    },
 }
