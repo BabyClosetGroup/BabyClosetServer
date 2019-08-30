@@ -41,7 +41,7 @@ module.exports = {
                     FROM postAreaCategory
                     JOIN post
                     ON postAreaCategory.postIdx = post.postIdx
-                    WHERE post.deadline <= curdate() + interval 4 day)
+                    WHERE post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day)
                     AS postArea
             ON postArea.postIdx = postImage.postIdx
             GROUP BY postArea.postIdx)
@@ -54,16 +54,16 @@ module.exports = {
     GetRecentPost : async () => {
         const selectRecentPostQuery = `
         SELECT
-        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.createdTime, postAreaImage.postImage ,areaCategory.areaName
+        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.postImage ,areaCategory.areaName
         FROM areaCategory
         JOIN
             (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postImage.postImage, postArea.areaCategoryIdx
             FROM postImage
             JOIN
                 (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
-                FROM BabyCloset.postAreaCategory
-                JOIN BabyCloset.post
-                ON BabyCloset.postAreaCategory.postIdx = BabyCloset.post.postIdx)
+                FROM postAreaCategory
+                JOIN post
+                ON postAreaCategory.postIdx = post.postIdx)
                 AS postArea
             On postArea.postIdx = postImage.postIdx
             GROUP BY postArea.postIdx)

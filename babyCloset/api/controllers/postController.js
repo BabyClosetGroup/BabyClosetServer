@@ -32,7 +32,32 @@ module.exports = {
             }
         }
     },
-        // 받아야 할 정보 이미지(여러 개), 카테고리(자치구, 나이, 옷 종류), 마감기한, 제목, 내용 
+        // 받아야 할 정보 나눔 나물 이미지(여러 개), 카테고리(자치구, 나이, 옷 종류), 마감기한, 제목, 내용 
     mainPost : async(req, res) => {
+        const getDeadLinePost = await postAccessObject.GetDeadLinePost();
+        const getRecentPost = await postAccessObject.GetRecentPost();
+        if(!getDeadLinePost || !getRecentPost)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            const filteredDeadlinePost = getDeadLinePost.map(post => {
+                if(post.postTitle.length > 8)
+                    post.postTitle = post.postTitle.substring(0, 8) + "..";
+                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').diff(moment(), 'days'));
+                return post
+            })
+            const filteredRecentPost = getRecentPost.map(post => {
+                if(post.postTitle.length > 11)
+                    post.postTitle = post.postTitle.substring(0, 11) + "..";
+                return post
+            })
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+            {
+                deadlinePost : filteredDeadlinePost,
+                recentPost : filteredRecentPost
+            }));
+        }
     }
 }
