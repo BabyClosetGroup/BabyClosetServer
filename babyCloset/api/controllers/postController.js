@@ -41,11 +41,11 @@ module.exports = {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
         else
-        {
+        {   
             const filteredDeadlinePost = getDeadLinePost.map(post => {
                 if(post.postTitle.length > 8)
                     post.postTitle = post.postTitle.substring(0, 8) + "..";
-                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').diff(moment(), 'days'));
+                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
                 return post
             })
             const filteredRecentPost = getRecentPost.map(post => {
