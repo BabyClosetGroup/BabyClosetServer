@@ -59,5 +59,24 @@ module.exports = {
                 recentPost : filteredRecentPost
             }));
         }
+    },
+    allPost: async(req, res) => {
+        const getAllPost = await postAccessObject.GetAllPost((parseInt(req.params.pagination)-1)*8);
+        if(!getAllPost)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            const filteredAllPost = getAllPost.map(post => {
+                if(post.postTitle.length > 12)
+                    post.postTitle = post.postTitle.substring(0, 12) + "..";
+                return post
+            })
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+            {
+                allPost : filteredAllPost
+            }));
+        }
     }
 }

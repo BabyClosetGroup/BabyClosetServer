@@ -5,6 +5,7 @@ const PostController = require('../controllers/postController');
 const upload = require('../../config/multer')
 
 router.get('/main', PostController.mainPost);
+router.get('/all/:pagination', PostController.allPost);
 router.post('/', upload.array('postImages'), authUtil.isLoggedIn, PostController.RegisterPost);
 
 module.exports = router;

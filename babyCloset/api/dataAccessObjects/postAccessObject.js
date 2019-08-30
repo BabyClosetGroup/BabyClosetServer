@@ -72,5 +72,27 @@ module.exports = {
         ORDER BY createdTime DESC LIMIT 4;`
         const selectRecentPostResult = await db.queryParam_None(selectRecentPostQuery);
         return selectRecentPostResult;
+    },
+    GetAllPost : async(offset) => {
+        const selectAllPostQuery = `
+        SELECT
+        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.postImage ,areaCategory.areaName
+        FROM areaCategory
+        JOIN
+            (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postImage.postImage, postArea.areaCategoryIdx
+            FROM postImage
+            JOIN
+                (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
+                FROM postAreaCategory
+                JOIN post
+                ON postAreaCategory.postIdx = post.postIdx)
+                AS postArea
+            On postArea.postIdx = postImage.postIdx
+            GROUP BY postArea.postIdx)
+            AS postAreaImage
+        On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
+        ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`
+        const selectAllPostResult = await db.queryParam_None(selectAllPostQuery);
+        return selectAllPostResult;
     }
 }
