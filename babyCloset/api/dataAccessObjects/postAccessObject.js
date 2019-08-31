@@ -52,21 +52,18 @@ module.exports = {
     GetRecentPost : async () => {
         const selectRecentPostQuery = `
         SELECT
-        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.postImage ,areaCategory.areaName
+        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.mainImage ,areaCategory.areaName
         FROM areaCategory
         JOIN
-        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postImage.postImage, postArea.areaCategoryIdx
-        FROM postImage
-        JOIN
-        (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postArea.mainImage, postArea.areaCategoryIdx
+        FROM
+        (SELECT post.postIdx, post.postTitle, post.createdTime, post.mainImage, postAreaCategory.areaCategoryIdx
         FROM postAreaCategory
         JOIN post ON postAreaCategory.postIdx = post.postIdx)
-        AS postArea
-        On postArea.postIdx = postImage.postIdx
-        GROUP BY postArea.postIdx)
+        AS postArea)
         AS postAreaImage
         On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
-        ORDER BY createdTime DESC LIMIT 4;`
+        ORDER BY createdTime DESC LIMIT 4`
         const selectRecentPostResult = await db.queryParam_None(selectRecentPostQuery);
         return selectRecentPostResult;
     },
