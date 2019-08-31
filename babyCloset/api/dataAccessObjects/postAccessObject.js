@@ -154,14 +154,10 @@ module.exports = {
         const selectUserAndImageResult = await db.queryParam_None(selectUserAndImageQuery);
         return selectUserAndImageResult;
     },
-    GetFilteredPost: async () => {
-        // const areaArr = distinct.split(",");
-        // const ageArr = age.split(",");
-        // const clothArr = cloth.split(",");
-
-        const areaArr = ['동작구'];
-        const ageArr = ['나이 전체'];
-        const clothArr = ['카테고리 전체'];
+    GetFilteredPost: async (area, age, cloth, offset) => {
+        const areaArr = area.split(",");
+        const ageArr = age.split(",");
+        const clothArr = cloth.split(",");
 
         function makeAreaWhereQuery(arr) {
             for(i=0; i<arr.length; i++)
@@ -173,9 +169,9 @@ module.exports = {
             for(i=0; i<arr.length; i++)
             {
                 const condition = `areaCategory.areaName = '${arr[i]}'`
-                conditions = `${conditions} AND ${condition}`
+                conditions = `${conditions} OR ${condition}`
             }
-            whereStr = `WHERE ${conditions.substring(5)}` // conditions가 ' AND ' 로 시작하기 때문에 제거해준다.
+            whereStr = `WHERE ${conditions.substring(4)}`
             return whereStr
         }
 
@@ -189,9 +185,9 @@ module.exports = {
             for(i=0; i<arr.length; i++)
             {
                 const condition = `ageCategory.ageName = '${arr[i]}'`
-                conditions = `${conditions} AND ${condition}`
+                conditions = `${conditions} OR ${condition}`
             }
-            whereStr = `WHERE ${conditions.substring(5)}` // conditions가 ' AND ' 로 시작하기 때문에 제거해준다.
+            whereStr = `WHERE ${conditions.substring(4)}`
             return whereStr
         }
 
@@ -205,12 +201,12 @@ module.exports = {
             for(i=0; i<arr.length; i++)
             {
                 const condition = `clothCategory.clothName = '${arr[i]}'`
-                conditions = `${conditions} AND ${condition}`
+                conditions = `${conditions} OR ${condition}`
             }
-            whereStr = `WHERE ${conditions.substring(5)}` // conditions가 ' AND ' 로 시작하기 때문에 제거해준다.
+            whereStr = `WHERE ${conditions.substring(4)}`
             return whereStr
         }
-        const query = `
+        const selectFilteredPostQuery = `
         SELECT detail.postIdx, detail.postTitle, detail.postContent, categories.areaName, categories.ageName, categories.clothName
         FROM 
         (SELECT postArea.postIdx, postArea.postTitle, postArea.postContent, postArea.createdTime
@@ -238,8 +234,8 @@ module.exports = {
         AS cloth
         WHERE area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
         AS categories
-        ON categories.postIdx = detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET 0`;
-        const result = await db.queryParam_None(query);
-        return result;
+        ON categories.postIdx = detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`
+        const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
+        return selectFilteredPostResult;
     }
 }

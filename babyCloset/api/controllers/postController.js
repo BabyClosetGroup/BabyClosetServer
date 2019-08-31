@@ -131,7 +131,24 @@ module.exports = {
         }
     },
     GetFilteredPost: async(req, res) => {
-        const getFilteredPost = await postAccessObject.GetFilteredPost(1,2,3);
-        console.log(getFilteredPost);
+        const area = req.body.area;
+        const age = req.body.age;
+        const cloth = req.body.cloth;
+        if(!area || !age || !cloth)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
+        }
+        const getFilteredPost = await postAccessObject.GetFilteredPost(area, age, cloth, 0);
+        if(!getFilteredPost)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+            {
+                filteredPost : getFilteredPost
+            }));
+        }
     }
 }  
