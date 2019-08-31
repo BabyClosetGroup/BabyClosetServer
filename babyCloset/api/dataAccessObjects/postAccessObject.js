@@ -16,6 +16,8 @@ module.exports = {
                 const postIdx = insertPostResult.insertId;
                 for(i=0; i<postImages.length ;i++)
                     await connection.query(insertPostImageQuery, [postImages[i].location, postIdx]);
+                const updateMainImageQuery = `UPDATE post SET mainImage = "${postImages[0].location}" WHERE postIdx = ?`
+                await connection.query(updateMainImageQuery, [postIdx]);
                 const insertAreaCategoryResult = await connection.query(insertAreaCategoryQuery, [areaName]);
                 const insertAgeCategoryResult = await connection.query(insertAgeCategoryQuery, [ageName]);
                 const insertClothCategoryResult = await connection.query(insertClothCategoryQuery, [clothName]);
