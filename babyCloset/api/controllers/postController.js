@@ -100,6 +100,7 @@ module.exports = {
         }
     },
     GetPostDetail: async(req, res) => {
-
+        const getDetailPost = await postAccessObject.GetDetailPost(19);
+        console.log(getDetailPost);
     }
 }

@@ -39,8 +39,7 @@ module.exports = {
         JOIN
         (SELECT post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
         FROM postAreaCategory
-        JOIN post
-        ON postAreaCategory.postIdx = post.postIdx
+        JOIN post ON postAreaCategory.postIdx = post.postIdx
         WHERE post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day)
         AS postArea
         ON postArea.postIdx = postImage.postIdx
@@ -62,8 +61,7 @@ module.exports = {
         JOIN
         (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
         FROM postAreaCategory
-        JOIN post
-        ON postAreaCategory.postIdx = post.postIdx)
+        JOIN post ON postAreaCategory.postIdx = post.postIdx)
         AS postArea
         On postArea.postIdx = postImage.postIdx
         GROUP BY postArea.postIdx)
@@ -84,8 +82,7 @@ module.exports = {
         JOIN
         (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
         FROM postAreaCategory
-        JOIN post
-        ON postAreaCategory.postIdx = post.postIdx)
+        JOIN post ON postAreaCategory.postIdx = post.postIdx)
         AS postArea
         On postArea.postIdx = postImage.postIdx
         GROUP BY postArea.postIdx)
@@ -119,38 +116,35 @@ module.exports = {
         return selectDeadlinePostResult;
     },
     GetDetailPost : async (postIdx) => {
-        `SELECT detail.postIdx, detail.postTitle, detail.postContent, detail.deadline, detail.postImage, categories.areaName, categories.ageName, categories.clothName 
-        FROM
-        (SELECT postArea.postIdx, postArea.postTitle, postArea.postContent, postArea.deadline, postImage.postImage
-        FROM postImage
-        JOIN
-        (SELECT post.postIdx, post.postTitle, post.postContent, post.deadline, postAreaCategory.areaCategoryIdx
-        FROM
-        BabyCloset.postAreaCategory
-        JOIN BabyCloset.post
-        ON BabyCloset.postAreaCategory.postIdx= BabyCloset.post.postIdx)
+        const selectDetailPostQuery = `
+        SELECT detail.postIdx, detail.postTitle, detail.postContent, detail.deadline, categories.areaName, categories.ageName, categories.clothName
+        FROM 
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.postContent, postArea.deadline FROM
+        (SELECT post.postIdx, post.postTitle, post.postContent, post.deadline, postAreaCategory.areaCategoryIdx 
+        FROM postAreaCategory
+        JOIN post
+        ON postAreaCategory.postIdx = post.postIdx)
         AS postArea
-        ON postArea.postIdx = postImage.postIdx
-        WHERE postArea.postIdx = ${postIdx}
-        GROUP by postArea.postIdx) as detail
+        WHERE postArea.postIdx = ${postIdx} GROUP BY postArea.postIdx) AS detail
         JOIN
         (SELECT area.postIdx, area.areaName, age.ageName, cloth.clothName
-        FROM (SELECT postAreaCategory.postIdx, areaCategory.areaCategoryIdx, areaCategory.areaName
-        FROM BabyCloset.postAreaCategory JOIN BabyCloset.areaCategory
-        ON BabyCloset.postAreaCategory.areaCategoryIdx = BabyCloset.areaCategory.areaCategoryIdx)
+        FROM
+        (SELECT postAreaCategory.postIdx, areaCategory.areaCategoryIdx, areaCategory.areaName
+        FROM postAreaCategory
+        JOIN areaCategory ON postAreaCategory.areaCategoryIdx = areaCategory.areaCategoryIdx)
         AS area,
         (SELECT postAgeCategory.postIdx, ageCategory.ageCategoryIdx, ageCategory.ageName
-        FROM BabyCloset.postAgeCategory
-        JOIN BabyCloset.ageCategory
-        ON BabyCloset.postAgeCategory.ageCategoryIdx = BabyCloset.ageCategory.ageCategoryIdx)
+        FROM postAgeCategory
+        JOIN ageCategory ON postAgeCategory.ageCategoryIdx = ageCategory.ageCategoryIdx)
         AS age,
         (SELECT postClothCategory.postIdx, clothCategory.clothCategoryIdx, clothCategory.clothName
-        FROM BabyCloset.postClothCategory
-        JOIN BabyCloset.clothCategory
-        ON BabyCloset.postClothCategory.clothCategoryIdx = BabyCloset.clothCategory.clothCategoryIdx)
+        FROM postClothCategory
+        JOIN clothCategory ON postClothCategory.clothCategoryIdx = clothCategory.clothCategoryIdx) 
         AS cloth
-        WHERE area.postIdx = ${postIdx} AND area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
+        WHERE area.postIdx = ${postIdx} AND area.postIdx = age.postIdx and area.postIdx = cloth.postIdx)
         AS categories
         ON categories.postIdx = detail.postIdx`
+        const selectDetailPostResult = await db.queryParam_None(selectDetailPostQuery);
+        return selectDetailPostResult;
     }
 }
