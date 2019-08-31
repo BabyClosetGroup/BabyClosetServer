@@ -155,9 +155,9 @@ module.exports = {
         return selectUserAndImageResult;
     },
     GetFilteredPost: async (area, age, cloth, offset) => {
-        const areaArr = area.split(",");
-        const ageArr = age.split(",");
-        const clothArr = cloth.split(",");
+        const areaArr = area.split(",").map(item => item.trim());
+        const ageArr = age.split(",").map(item => item.trim());
+        const clothArr = cloth.split(",").map(item => item.trim());
 
         function makeAreaWhereQuery(arr) {
             for(i=0; i<arr.length; i++)
