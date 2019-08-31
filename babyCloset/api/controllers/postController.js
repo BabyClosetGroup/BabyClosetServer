@@ -138,16 +138,48 @@ module.exports = {
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
-        const getFilteredPost = await postAccessObject.GetFilteredAllPost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
+        let getFilteredPost = await postAccessObject.GetFilteredAllPost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
         if(!getFilteredPost)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
         else
         {
+            getFilteredPost = getFilteredPost.map(post => {
+                if(post.postTitle.length > 12)
+                    post.postTitle = post.postTitle.substring(0, 12) + "..";
+                return post
+            })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
                 filteredAllPost : getFilteredPost
+            }));
+        }
+    },
+    GetFilteredDeadlinePost: async(req, res) => {
+        const area = req.body.area;
+        const age = req.body.age;
+        const cloth = req.body.cloth;
+        if(!area || !age || !cloth)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
+        }
+        let getFilteredPost = await postAccessObject.GetFilteredDeadlinePost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
+        if(!getFilteredPost)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            getFilteredPost = getFilteredPost.map(post => {
+                if(post.postTitle.length > 12)
+                    post.postTitle = post.postTitle.substring(0, 12) + "..";
+                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
+                return post
+            })
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+            {
+                filteredDeadlinePost : getFilteredPost
             }));
         }
     }

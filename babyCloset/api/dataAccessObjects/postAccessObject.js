@@ -92,7 +92,7 @@ module.exports = {
         AS postArea)
         AS postAreaImage
         ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
-        ORDER BY deadline LIMIT 3`
+        ORDER BY deadline LIMIT 3`;
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;
     },
@@ -110,7 +110,7 @@ module.exports = {
         AS postArea)
         AS postAreaImage
         On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
-        ORDER BY createdTime DESC LIMIT 4`
+        ORDER BY createdTime DESC LIMIT 4`;
         const selectRecentPostResult = await db.queryParam_None(selectRecentPostQuery);
         return selectRecentPostResult;
     },
@@ -128,7 +128,7 @@ module.exports = {
         AS postArea)
         AS postAreaImage
         On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
-        ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`
+        ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`;
         const selectAllPostResult = await db.queryParam_None(selectAllPostQuery);
         return selectAllPostResult;
     },
@@ -148,7 +148,7 @@ module.exports = {
         AS postArea)
         AS postAreaImage
         ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
-        ORDER BY deadline LIMIT 8 OFFSET ${offset}`
+        ORDER BY deadline LIMIT 8 OFFSET ${offset}`;
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;
     },
@@ -180,14 +180,14 @@ module.exports = {
         AS cloth
         WHERE area.postIdx = ${postIdx} AND area.postIdx = age.postIdx and area.postIdx = cloth.postIdx)
         AS categories
-        ON categories.postIdx = detail.postIdx`
+        ON categories.postIdx = detail.postIdx`;
         const selectDetailPostResult = await db.queryParam_None(selectDetailPostQuery);
         return selectDetailPostResult;
     },
     GetUserAndImages : async (postIdx) => {
         const selectUserAndImageQuery = `
         SELECT user.nickname, postImage.postImage
-        FROM post, user, postImage where post.postIdx=${postIdx} and postImage.postIdx = post.postIdx and post.userIdx = user.userIdx`
+        FROM post, user, postImage where post.postIdx=${postIdx} and postImage.postIdx = post.postIdx and post.userIdx = user.userIdx`;
         const selectUserAndImageResult = await db.queryParam_None(selectUserAndImageQuery);
         return selectUserAndImageResult;
     },
@@ -223,9 +223,45 @@ module.exports = {
         AS cloth
         WHERE area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
         AS categories
-        ON categories.postIdx = detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`
+        ON categories.postIdx = detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset}`;
         const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
         return selectFilteredPostResult;
     },
-    // GetFilteredDeadlinePost
+    GetFilteredDeadlinePost: async(area, age, cloth, offset) => {
+
+        const areaArr = area.split(",").map(item => item.trim());
+        const ageArr = age.split(",").map(item => item.trim());
+        const clothArr = cloth.split(",").map(item => item.trim());
+        const selectFilteredPostQuery = `
+        SELECT detail.postIdx, detail.postTitle, categories.areaName, detail.deadline, detail.mainImage
+        FROM 
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.deadline, postArea.mainImage
+        FROM
+        (SELECT post.postIdx, post.postTitle, postAreaCategory.areaCategoryIdx, post.deadline, post.mainImage
+        FROM postAreaCategory
+        JOIN post
+        ON postAreaCategory.postIdx = post.postIdx)
+        AS postArea
+        GROUP BY postArea.postIdx) AS detail
+        JOIN
+        (SELECT area.postIdx, area.areaName, age.ageName, cloth.clothName
+        FROM
+        (SELECT postAreaCategory.postIdx, areaCategory.areaCategoryIdx, areaCategory.areaName
+        FROM postAreaCategory
+        JOIN areaCategory ON postAreaCategory.areaCategoryIdx = areaCategory.areaCategoryIdx ${makeAreaWhereQuery(areaArr)})
+        AS area,
+        (SELECT postAgeCategory.postIdx, ageCategory.ageCategoryIdx, ageCategory.ageName
+        FROM postAgeCategory
+        JOIN ageCategory ON postAgeCategory.ageCategoryIdx = ageCategory.ageCategoryIdx ${makeAgeWhereQuery(ageArr)})
+        AS age,
+        (SELECT postClothCategory.postIdx, clothCategory.clothCategoryIdx, clothCategory.clothName
+        FROM postClothCategory
+        JOIN clothCategory ON postClothCategory.clothCategoryIdx = clothCategory.clothCategoryIdx ${makeClothWhereQuery(clothArr)}) 
+        AS cloth
+        WHERE area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
+        AS categories
+        ON categories.postIdx = detail.postIdx ORDER BY deadline LIMIT 8 OFFSET ${offset}`;
+        const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
+        return selectFilteredPostResult;
+    }
 }
