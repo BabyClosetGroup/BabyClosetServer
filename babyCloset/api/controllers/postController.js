@@ -130,7 +130,7 @@ module.exports = {
             }));
         }
     },
-    GetFilteredPost: async(req, res) => {
+    GetFilteredAllPost: async(req, res) => {
         const area = req.body.area;
         const age = req.body.age;
         const cloth = req.body.cloth;
@@ -138,7 +138,7 @@ module.exports = {
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
-        const getFilteredPost = await postAccessObject.GetFilteredPost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
+        const getFilteredPost = await postAccessObject.GetFilteredAllPost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
         if(!getFilteredPost)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
@@ -147,7 +147,7 @@ module.exports = {
         {
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
-                filteredPost : getFilteredPost
+                filteredAllPost : getFilteredPost
             }));
         }
     }

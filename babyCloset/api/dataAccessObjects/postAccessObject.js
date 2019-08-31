@@ -154,7 +154,7 @@ module.exports = {
         const selectUserAndImageResult = await db.queryParam_None(selectUserAndImageQuery);
         return selectUserAndImageResult;
     },
-    GetFilteredPost: async (area, age, cloth, offset) => {
+    GetFilteredAllPost: async (area, age, cloth, offset) => {
         const areaArr = area.split(",").map(item => item.trim());
         const ageArr = age.split(",").map(item => item.trim());
         const clothArr = cloth.split(",").map(item => item.trim());
@@ -207,11 +207,11 @@ module.exports = {
             return whereStr
         }
         const selectFilteredPostQuery = `
-        SELECT detail.postIdx, detail.postTitle, detail.postContent, categories.areaName, categories.ageName, categories.clothName
+        SELECT detail.postIdx, detail.postTitle, categories.areaName
         FROM 
-        (SELECT postArea.postIdx, postArea.postTitle, postArea.postContent, postArea.createdTime
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime
         FROM
-        (SELECT post.postIdx, post.postTitle, post.postContent, postAreaCategory.areaCategoryIdx, post.createdTime 
+        (SELECT post.postIdx, post.postTitle, postAreaCategory.areaCategoryIdx, post.createdTime 
         FROM postAreaCategory
         JOIN post
         ON postAreaCategory.postIdx = post.postIdx)
