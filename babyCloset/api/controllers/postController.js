@@ -138,7 +138,7 @@ module.exports = {
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
-        const getFilteredPost = await postAccessObject.GetFilteredPost(area, age, cloth, 0);
+        const getFilteredPost = await postAccessObject.GetFilteredPost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
         if(!getFilteredPost)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));

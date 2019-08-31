@@ -8,7 +8,7 @@ router.get('/main', PostController.GetMainPost);
 router.get('/all/:pagination', PostController.GetAllPost);
 router.get('/deadline/:pagination', PostController.GetDeadlinePost);
 router.get('/:postIdx', PostController.GetPostDetail);
-router.post('/filter', PostController.GetFilteredPost);
+router.post('/filter/:pagination', PostController.GetFilteredPost);
 router.post('/', upload.array('postImages'), authUtil.isLoggedIn, PostController.RegisterPost);
 
 module.exports = router;
