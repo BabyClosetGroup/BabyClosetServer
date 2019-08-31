@@ -153,5 +153,93 @@ module.exports = {
         FROM post, user, postImage where post.postIdx=${postIdx} and postImage.postIdx = post.postIdx and post.userIdx = user.userIdx`
         const selectUserAndImageResult = await db.queryParam_None(selectUserAndImageQuery);
         return selectUserAndImageResult;
+    },
+    GetFilteredPost: async () => {
+        // const areaArr = distinct.split(",");
+        // const ageArr = age.split(",");
+        // const clothArr = cloth.split(",");
+
+        const areaArr = ['동작구'];
+        const ageArr = ['나이 전체'];
+        const clothArr = ['카테고리 전체'];
+
+        function makeAreaWhereQuery(arr) {
+            for(i=0; i<arr.length; i++)
+            {
+                if (arr[i] == "서울 전체")
+                    return ""
+            }
+            let conditions = "";
+            for(i=0; i<arr.length; i++)
+            {
+                const condition = `areaCategory.areaName = '${arr[i]}'`
+                conditions = `${conditions} AND ${condition}`
+            }
+            whereStr = `WHERE ${conditions.substring(5)}` // conditions가 ' AND ' 로 시작하기 때문에 제거해준다.
+            return whereStr
+        }
+
+        function makeAgeWhereQuery(arr) {
+            for(i=0; i<arr.length; i++)
+            {
+                if (arr[i] == "나이 전체")
+                    return ""
+            }
+            let conditions = "";
+            for(i=0; i<arr.length; i++)
+            {
+                const condition = `ageCategory.ageName = '${arr[i]}'`
+                conditions = `${conditions} AND ${condition}`
+            }
+            whereStr = `WHERE ${conditions.substring(5)}` // conditions가 ' AND ' 로 시작하기 때문에 제거해준다.
+            return whereStr
+        }
+
+        function makeClothWhereQuery(arr) {
+            for(i=0; i<arr.length; i++)
+            {
+                if (arr[i] == "카테고리 전체")
+                    return ""
+            }
+            let conditions = "";
+            for(i=0; i<arr.length; i++)
+            {
+                const condition = `clothCategory.clothName = '${arr[i]}'`
+                conditions = `${conditions} AND ${condition}`
+            }
+            whereStr = `WHERE ${conditions.substring(5)}` // conditions가 ' AND ' 로 시작하기 때문에 제거해준다.
+            return whereStr
+        }
+        const query = `
+        SELECT detail.postIdx, detail.postTitle, detail.postContent, categories.areaName, categories.ageName, categories.clothName
+        FROM 
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.postContent, postArea.createdTime
+        FROM
+        (SELECT post.postIdx, post.postTitle, post.postContent, postAreaCategory.areaCategoryIdx, post.createdTime 
+        FROM postAreaCategory
+        JOIN post
+        ON postAreaCategory.postIdx = post.postIdx)
+        AS postArea
+        GROUP BY postArea.postIdx) AS detail
+        JOIN
+        (SELECT area.postIdx, area.areaName, age.ageName, cloth.clothName
+        FROM
+        (SELECT postAreaCategory.postIdx, areaCategory.areaCategoryIdx, areaCategory.areaName
+        FROM postAreaCategory
+        JOIN areaCategory ON postAreaCategory.areaCategoryIdx = areaCategory.areaCategoryIdx ${makeAreaWhereQuery(areaArr)})
+        AS area,
+        (SELECT postAgeCategory.postIdx, ageCategory.ageCategoryIdx, ageCategory.ageName
+        FROM postAgeCategory
+        JOIN ageCategory ON postAgeCategory.ageCategoryIdx = ageCategory.ageCategoryIdx ${makeAgeWhereQuery(ageArr)})
+        AS age,
+        (SELECT postClothCategory.postIdx, clothCategory.clothCategoryIdx, clothCategory.clothName
+        FROM postClothCategory
+        JOIN clothCategory ON postClothCategory.clothCategoryIdx = clothCategory.clothCategoryIdx ${makeClothWhereQuery(clothArr)}) 
+        AS cloth
+        WHERE area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
+        AS categories
+        ON categories.postIdx = detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET 0`;
+        const result = await db.queryParam_None(query);
+        return result;
     }
 }

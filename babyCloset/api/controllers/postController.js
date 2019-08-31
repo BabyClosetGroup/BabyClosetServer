@@ -129,5 +129,9 @@ module.exports = {
                 detailPost : ResData
             }));
         }
+    },
+    GetFilteredPost: async(req, res) => {
+        const getFilteredPost = await postAccessObject.GetFilteredPost(1,2,3);
+        console.log(getFilteredPost);
     }
 }  
