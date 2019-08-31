@@ -197,11 +197,11 @@ module.exports = {
             return whereStr
         }
         const selectFilteredPostQuery = `
-        SELECT detail.postIdx, detail.postTitle, categories.areaName
+        SELECT detail.postIdx, detail.postTitle, categories.areaName, detail.mainImage
         FROM 
-        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postArea.mainImage
         FROM
-        (SELECT post.postIdx, post.postTitle, postAreaCategory.areaCategoryIdx, post.createdTime 
+        (SELECT post.postIdx, post.postTitle, postAreaCategory.areaCategoryIdx, post.createdTime, post.mainImage
         FROM postAreaCategory
         JOIN post
         ON postAreaCategory.postIdx = post.postIdx)
