@@ -146,5 +146,12 @@ module.exports = {
         ON categories.postIdx = detail.postIdx`
         const selectDetailPostResult = await db.queryParam_None(selectDetailPostQuery);
         return selectDetailPostResult;
+    },
+    GetUserAndImages : async (postIdx) => {
+        const selectUserAndImageQuery = `
+        SELECT user.nickname, postImage.postImage
+        FROM post, user, postImage where post.postIdx=${postIdx} and postImage.postIdx = post.postIdx and post.userIdx = user.userIdx`
+        const selectUserAndImageResult = await db.queryParam_None(selectUserAndImageQuery);
+        return selectUserAndImageResult;
     }
 }
