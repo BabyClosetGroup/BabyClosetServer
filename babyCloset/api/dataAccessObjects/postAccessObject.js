@@ -1,4 +1,51 @@
 const db = require('../../modules/utils/db/pool');
+const makeAreaWhereQuery = (arr) => {
+    for(i=0; i<arr.length; i++)
+    {
+        if (arr[i] == "서울 전체")
+            return ""
+    }
+    let conditions = "";
+    for(i=0; i<arr.length; i++)
+    {
+        const condition = `areaCategory.areaName = '${arr[i]}'`
+        conditions = `${conditions} OR ${condition}`
+    }
+    whereStr = `WHERE ${conditions.substring(4)}`
+    return whereStr
+}
+
+const makeAgeWhereQuery = (arr) => {
+    for(i=0; i<arr.length; i++)
+    {
+        if (arr[i] == "나이 전체")
+            return ""
+    }
+    let conditions = "";
+    for(i=0; i<arr.length; i++)
+    {
+        const condition = `ageCategory.ageName = '${arr[i]}'`
+        conditions = `${conditions} OR ${condition}`
+    }
+    whereStr = `WHERE ${conditions.substring(4)}`
+    return whereStr
+}
+
+const makeClothWhereQuery = (arr) => {
+    for(i=0; i<arr.length; i++)
+    {
+        if (arr[i] == "카테고리 전체")
+            return ""
+    }
+    let conditions = "";
+    for(i=0; i<arr.length; i++)
+    {
+        const condition = `clothCategory.clothName = '${arr[i]}'`
+        conditions = `${conditions} OR ${condition}`
+    }
+    whereStr = `WHERE ${conditions.substring(4)}`
+    return whereStr
+}
 
 module.exports = {
     RegisterPost : async (postImages, postTitle, postContent, deadline, createdTime, userIdx, areaName, ageName, clothName)  => {
@@ -148,54 +195,6 @@ module.exports = {
         const areaArr = area.split(",").map(item => item.trim());
         const ageArr = age.split(",").map(item => item.trim());
         const clothArr = cloth.split(",").map(item => item.trim());
-
-        function makeAreaWhereQuery(arr) {
-            for(i=0; i<arr.length; i++)
-            {
-                if (arr[i] == "서울 전체")
-                    return ""
-            }
-            let conditions = "";
-            for(i=0; i<arr.length; i++)
-            {
-                const condition = `areaCategory.areaName = '${arr[i]}'`
-                conditions = `${conditions} OR ${condition}`
-            }
-            whereStr = `WHERE ${conditions.substring(4)}`
-            return whereStr
-        }
-
-        function makeAgeWhereQuery(arr) {
-            for(i=0; i<arr.length; i++)
-            {
-                if (arr[i] == "나이 전체")
-                    return ""
-            }
-            let conditions = "";
-            for(i=0; i<arr.length; i++)
-            {
-                const condition = `ageCategory.ageName = '${arr[i]}'`
-                conditions = `${conditions} OR ${condition}`
-            }
-            whereStr = `WHERE ${conditions.substring(4)}`
-            return whereStr
-        }
-
-        function makeClothWhereQuery(arr) {
-            for(i=0; i<arr.length; i++)
-            {
-                if (arr[i] == "카테고리 전체")
-                    return ""
-            }
-            let conditions = "";
-            for(i=0; i<arr.length; i++)
-            {
-                const condition = `clothCategory.clothName = '${arr[i]}'`
-                conditions = `${conditions} OR ${condition}`
-            }
-            whereStr = `WHERE ${conditions.substring(4)}`
-            return whereStr
-        }
         const selectFilteredPostQuery = `
         SELECT detail.postIdx, detail.postTitle, categories.areaName, detail.mainImage
         FROM 
@@ -227,5 +226,6 @@ module.exports = {
         ON categories.postIdx = detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`
         const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
         return selectFilteredPostResult;
-    }
+    },
+    // GetFilteredDeadlinePost
 }
