@@ -4,9 +4,10 @@ const router = express.Router();
 const PostController = require('../controllers/postController');
 const upload = require('../../config/multer')
 
-router.get('/main', PostController.mainPost);
-router.get('/all/:pagination', PostController.allPost);
-router.get('/deadline/:pagination', PostController.deadlinePost);
+router.get('/main', PostController.GetMainPost);
+router.get('/all/:pagination', PostController.GetAllPost);
+router.get('/deadline/:pagination', PostController.GetDeadlinePost);
+router.get('/:postIdx', PostController.GetPostDetail);
 router.post('/', upload.array('postImages'), authUtil.isLoggedIn, PostController.RegisterPost);
 
 module.exports = router;

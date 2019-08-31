@@ -5,6 +5,7 @@ const postAccessObject = require('../dataAccessObjects/postAccessObject');
 const moment = require('moment');
 
 module.exports = {
+    // 받아야 할 정보 나눔 나물 이미지(여러 개), 카테고리(자치구, 나이, 옷 종류), 마감기한, 제목, 내용 
     RegisterPost: async(req, res) => {
         const userIdx = req.decoded.userIdx;
         const postImages = req.files;
@@ -32,8 +33,7 @@ module.exports = {
             }
         }
     },
-        // 받아야 할 정보 나눔 나물 이미지(여러 개), 카테고리(자치구, 나이, 옷 종류), 마감기한, 제목, 내용 
-    mainPost : async(req, res) => {
+    GetMainPost : async(req, res) => {
         const getDeadLinePost = await postAccessObject.GetDeadLinePost();
         const getRecentPost = await postAccessObject.GetRecentPost();
         if(!getDeadLinePost || !getRecentPost)
@@ -60,7 +60,7 @@ module.exports = {
             }));
         }
     },
-    allPost: async(req, res) => {
+    GetAllPost: async(req, res) => {
         const getAllPost = await postAccessObject.GetAllPost((parseInt(req.params.pagination)-1)*8);
         if(!getAllPost)
         {
@@ -79,7 +79,7 @@ module.exports = {
             }));
         }
     },
-    deadlinePost: async(req, res) => {
+    GetDeadlinePost: async(req, res) => {
         const getDeadlinePost = await postAccessObject.GetDeadLinePostWithPagination((parseInt(req.params.pagination)-1)*8);
         if(!getDeadlinePost)
         {
@@ -98,5 +98,8 @@ module.exports = {
                 deadlinePost : filteredDeadlinePost
             }));
         }
+    },
+    GetPostDetail: async(req, res) => {
+
     }
 }

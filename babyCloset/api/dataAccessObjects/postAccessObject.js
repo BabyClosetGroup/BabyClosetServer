@@ -34,18 +34,18 @@ module.exports = {
         postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.deadline, postAreaImage.postImage, areaCategory.areaName
         FROM areaCategory
         JOIN
-            (SELECT postArea.postIdx, postArea.postTitle, postArea.deadline, postImage.postImage, postArea.areaCategoryIdx
-            FROM postImage
-            JOIN
-                (SELECT post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
-                    FROM postAreaCategory
-                    JOIN post
-                    ON postAreaCategory.postIdx = post.postIdx
-                    WHERE post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day)
-                    AS postArea
-            ON postArea.postIdx = postImage.postIdx
-            GROUP BY postArea.postIdx)
-            AS postAreaImage
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.deadline, postImage.postImage, postArea.areaCategoryIdx
+        FROM postImage
+        JOIN
+        (SELECT post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
+        FROM postAreaCategory
+        JOIN post
+        ON postAreaCategory.postIdx = post.postIdx
+        WHERE post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day)
+        AS postArea
+        ON postArea.postIdx = postImage.postIdx
+        GROUP BY postArea.postIdx)
+        AS postAreaImage
         ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
         ORDER BY deadline LIMIT 3`
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
@@ -57,17 +57,17 @@ module.exports = {
         postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.postImage ,areaCategory.areaName
         FROM areaCategory
         JOIN
-            (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postImage.postImage, postArea.areaCategoryIdx
-            FROM postImage
-            JOIN
-                (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
-                FROM postAreaCategory
-                JOIN post
-                ON postAreaCategory.postIdx = post.postIdx)
-                AS postArea
-            On postArea.postIdx = postImage.postIdx
-            GROUP BY postArea.postIdx)
-            AS postAreaImage
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postImage.postImage, postArea.areaCategoryIdx
+        FROM postImage
+        JOIN
+        (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
+        FROM postAreaCategory
+        JOIN post
+        ON postAreaCategory.postIdx = post.postIdx)
+        AS postArea
+        On postArea.postIdx = postImage.postIdx
+        GROUP BY postArea.postIdx)
+        AS postAreaImage
         On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
         ORDER BY createdTime DESC LIMIT 4;`
         const selectRecentPostResult = await db.queryParam_None(selectRecentPostQuery);
@@ -79,17 +79,17 @@ module.exports = {
         postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.postImage ,areaCategory.areaName
         FROM areaCategory
         JOIN
-            (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postImage.postImage, postArea.areaCategoryIdx
-            FROM postImage
-            JOIN
-                (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
-                FROM postAreaCategory
-                JOIN post
-                ON postAreaCategory.postIdx = post.postIdx)
-                AS postArea
-            On postArea.postIdx = postImage.postIdx
-            GROUP BY postArea.postIdx)
-            AS postAreaImage
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postImage.postImage, postArea.areaCategoryIdx
+        FROM postImage
+        JOIN
+        (SELECT post.postIdx, post.postTitle, post.createdTime, postAreaCategory.areaCategoryIdx
+        FROM postAreaCategory
+        JOIN post
+        ON postAreaCategory.postIdx = post.postIdx)
+        AS postArea
+        On postArea.postIdx = postImage.postIdx
+        GROUP BY postArea.postIdx)
+        AS postAreaImage
         On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
         ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`
         const selectAllPostResult = await db.queryParam_None(selectAllPostQuery);
@@ -101,21 +101,56 @@ module.exports = {
         postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.deadline, postAreaImage.postImage, areaCategory.areaName
         FROM areaCategory
         JOIN
-            (SELECT postArea.postIdx, postArea.postTitle, postArea.deadline, postImage.postImage, postArea.areaCategoryIdx
-            FROM postImage
-            JOIN
-                (SELECT post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
-                    FROM postAreaCategory
-                    JOIN post
-                    ON postAreaCategory.postIdx = post.postIdx
-                    WHERE post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day)
-                    AS postArea
-            ON postArea.postIdx = postImage.postIdx
-            GROUP BY postArea.postIdx)
-            AS postAreaImage
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.deadline, postImage.postImage, postArea.areaCategoryIdx
+        FROM postImage
+        JOIN
+        (SELECT post.postIdx, post.postTitle, post.deadline, postAreaCategory.areaCategoryIdx
+        FROM postAreaCategory
+        JOIN post
+        ON postAreaCategory.postIdx = post.postIdx
+        WHERE post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day)
+        AS postArea
+        ON postArea.postIdx = postImage.postIdx
+        GROUP BY postArea.postIdx)
+        AS postAreaImage
         ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
         ORDER BY deadline LIMIT 8 OFFSET ${offset}`
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;
     },
+    GetDetailPost : async (postIdx) => {
+        `SELECT detail.postIdx, detail.postTitle, detail.postContent, detail.deadline, detail.postImage, categories.areaName, categories.ageName, categories.clothName 
+        FROM
+        (SELECT postArea.postIdx, postArea.postTitle, postArea.postContent, postArea.deadline, postImage.postImage
+        FROM postImage
+        JOIN
+        (SELECT post.postIdx, post.postTitle, post.postContent, post.deadline, postAreaCategory.areaCategoryIdx
+        FROM
+        BabyCloset.postAreaCategory
+        JOIN BabyCloset.post
+        ON BabyCloset.postAreaCategory.postIdx= BabyCloset.post.postIdx)
+        AS postArea
+        ON postArea.postIdx = postImage.postIdx
+        WHERE postArea.postIdx = ${postIdx}
+        GROUP by postArea.postIdx) as detail
+        JOIN
+        (SELECT area.postIdx, area.areaName, age.ageName, cloth.clothName
+        FROM (SELECT postAreaCategory.postIdx, areaCategory.areaCategoryIdx, areaCategory.areaName
+        FROM BabyCloset.postAreaCategory JOIN BabyCloset.areaCategory
+        ON BabyCloset.postAreaCategory.areaCategoryIdx = BabyCloset.areaCategory.areaCategoryIdx)
+        AS area,
+        (SELECT postAgeCategory.postIdx, ageCategory.ageCategoryIdx, ageCategory.ageName
+        FROM BabyCloset.postAgeCategory
+        JOIN BabyCloset.ageCategory
+        ON BabyCloset.postAgeCategory.ageCategoryIdx = BabyCloset.ageCategory.ageCategoryIdx)
+        AS age,
+        (SELECT postClothCategory.postIdx, clothCategory.clothCategoryIdx, clothCategory.clothName
+        FROM BabyCloset.postClothCategory
+        JOIN BabyCloset.clothCategory
+        ON BabyCloset.postClothCategory.clothCategoryIdx = BabyCloset.clothCategory.clothCategoryIdx)
+        AS cloth
+        WHERE area.postIdx = ${postIdx} AND area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
+        AS categories
+        ON categories.postIdx = detail.postIdx`
+    }
 }
