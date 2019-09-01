@@ -34,10 +34,17 @@ module.exports = {
         else
         {
             const getNotes = await noteAccessObject.GetNotesWithSpecificUser(loggedInUser, counterpart);
-            if (!getNotes) {
+            const updateReadBit = await noteAccessObject.UpdateReadBit(loggedInUser, counterpart);
+            const getCounterpartNickname = await noteAccessObject.GetCounterpartNickname(counterpart);
+            console.log(getCounterpartNickname);
+            if (!getNotes || !updateReadBit || !getCounterpartNickname) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
-            } else {
-                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('쪽지')));
+            }
+            else {
+                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('쪽지'), {
+                    receiver: getCounterpartNickname[0],
+                    messages : getNotes
+                }));
             }
         }
     }
