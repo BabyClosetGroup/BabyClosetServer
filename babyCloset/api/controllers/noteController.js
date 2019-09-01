@@ -25,6 +25,20 @@ module.exports = {
         }
     },
     GetNotesWithSpecificUser : async(req, res) => {
-
+        const loggedInUser = req.decoded.userIdx;
+        const counterpart = req.params.userIdx;
+        if(!counterpart)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
+        }
+        else
+        {
+            const getNotes = await noteAccessObject.GetNotesWithSpecificUser(loggedInUser, counterpart);
+            if (!getNotes) {
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
+            } else {
+                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('쪽지')));
+            }
+        }
     }
 }

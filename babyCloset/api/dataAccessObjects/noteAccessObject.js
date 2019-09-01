@@ -8,9 +8,14 @@ module.exports = {
     },
     GetNotesWithSpecificUser : async (userIdx1, userIdx2) => {
         const getNotesQuery = `SELECT noteIdx, noteContent, senderIdx, receiverIdx
-        FROM BabyCloset.note where (senderIdx = ${userIdx1} and receiverIdx=${userIdx2})
-        OR (senderIdx = ${userIdx2} and receiverIdx= ${userIdx1}) order by createdTime desc`
-        const getNotesResult = await db.queryParam_None(getNotesQuery);
-        return getNotesResult
+        FROM note WHERE (senderIdx = ${userIdx1} AND receiverIdx=${userIdx2})
+        OR (senderIdx = ${userIdx2} AND receiverIdx= ${userIdx1}) ORDER BY createdTime DESC`;
+        const updateIsRead = `UPDATE note SET isRead=1 WHERE isREAD <> 1 AND (senderIdx = ${userIdx1} AND receiverIdx=${userIdx2})
+        OR (senderIdx = ${userIdx2} AND receiverIdx= ${userIdx1})`;
+        const getTransaction = await db.Transaction(async(connection) => {
+            await connection.query(getNotesQuery);
+            await connection.query(updateIsRead);
+            });
+        return getTransaction;
     }
 }
