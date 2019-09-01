@@ -122,6 +122,7 @@ module.exports = {
                 images.push(getUserAndImages[i].postImage)
             const ResData = filteredDetailPost[0];
             ResData.nickname = getUserAndImages[0].nickname;
+            ResData.userIdx = getUserAndImages[0].userIdx;
             console.log(getUserAndImages[0])
             ResData.postImages = images;
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
