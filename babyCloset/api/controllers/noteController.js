@@ -24,4 +24,7 @@ module.exports = {
             }
         }
     },
+    GetNotesWithSpecificUser : async(req, res) => {
+
+    }
 }
