@@ -8,9 +8,9 @@ module.exports = {
     },
     GetNotesWithSpecificUser : async (userIdx1, userIdx2) => {
         const getNotesQuery = `
-        SELECT filteredNote.noteIdx, filteredNote.noteContent, filteredNote.senderIdx, filteredNote.receiverIdx, user.nickname
+        SELECT filteredNote.noteIdx, filteredNote.senderIdx, filteredNote.noteContent, filteredNote.createdTime, user.nickname
         FROM user,
-        (SELECT noteIdx, noteContent, senderIdx, receiverIdx
+        (SELECT noteIdx, noteContent, senderIdx, receiverIdx, createdTime
         FROM note
         WHERE (senderIdx = ${userIdx1} and receiverIdx=${userIdx2}) OR (senderIdx = ${userIdx2} and receiverIdx = ${userIdx1})
         ORDER BY createdTime DESC)
