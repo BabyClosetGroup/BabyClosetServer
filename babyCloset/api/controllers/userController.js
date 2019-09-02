@@ -10,7 +10,7 @@ const jwt = require('../../modules/utils/security/jwt');
 module.exports = {
     SignUp: async(req, res) => {
         let duplicate = false;
-        if(!req.body.id || !req.body.name || !req.body.password || !req.body.nickname)
+        if(!req.body.userId || !req.body.name || !req.body.password || !req.body.nickname)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
@@ -23,7 +23,7 @@ module.exports = {
                 for(i=0; i<getAllUserResult.length ;i++)
                 {
                     user = getAllUserResult[i];
-                    if(user.userId == req.body.id)
+                    if(user.userId == req.body.userId)
                     {
                         res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.USER_ALREADY_EXISTS));
                         duplicate = true;
@@ -46,7 +46,7 @@ module.exports = {
                     const password = await crypto.pbkdf2(req.body.password, salt.toString('base64'), 1000, 32, 'SHA512');
                     const insertUserQuery = 'INSERT INTO user (username, userId, password, salt, nickname) VALUES (?, ?, ?, ?, ?)';
                     const insertUserResult = await db.queryParam_Arr(insertUserQuery,
-                        [req.body.name, req.body.id, password.toString('base64'), salt.toString('base64'), req.body.nickname]);
+                        [req.body.name, req.body.userId, password.toString('base64'), salt.toString('base64'), req.body.nickname]);
                     if (!insertUserResult) {
                         res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.USER_INSERT_FAIL));
                     } else { 
@@ -76,7 +76,7 @@ module.exports = {
                     const token = jwt.sign(User).accessToken
                     const responseData = {
                         userIdx: resultUser[0].userIdx,
-                        id: resultUser[0].userId,
+                        userId: resultUser[0].userId,
                         name: resultUser[0].username,
                         nickname: resultUser[0].nickname,
                         token

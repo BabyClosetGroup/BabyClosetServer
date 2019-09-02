@@ -48,6 +48,7 @@ module.exports = {
                     else
                         note.noteType = "받은 쪽지"
                     delete note.senderIdx;
+                    delete note.nickname;
                     return note;
                 })
                 res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('쪽지'), {
