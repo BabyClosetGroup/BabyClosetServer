@@ -267,13 +267,13 @@ module.exports = {
         return selectFilteredPostResult;
     },
     UpdatePost: async(title, content, deadline, areaCategory, ageCategory, clothCategory, postImages, postIdx) => {
-        const UpdateAgeCategoryQuery = `UPDATE ageCategory JOIN postAgeCategory
+        const updateAgeCategoryQuery = `UPDATE ageCategory JOIN postAgeCategory
         ON ageCategory.ageCategoryIdx = postAgeCategory.ageCategoryIdx
         SET ageCategory.ageName = ? where postAgeCategory.postIdx = ?`;
-        const UpdateAreaCategoryQuery = `UPDATE areaCategory JOIN postAreaCategory
+        const updateAreaCategoryQuery = `UPDATE areaCategory JOIN postAreaCategory
         ON areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx
         SET areaCategory.areaName = ? where postAreaCategory.postIdx = ?`;
-        const UpdateClothCategoryQuery = `UPDATE clothCategory JOIN postClothCategory
+        const updateClothCategoryQuery = `UPDATE clothCategory JOIN postClothCategory
         ON clothCategory.clothCategoryIdx = postClothCategory.clothCategoryIdx
         SET clothCategory.clothName = ? where postClothCategory.postIdx = ?`;
         const updateTitleQuery = 'UPDATE post SET postTitle = ? WHERE post.postIdx = ?';
@@ -293,11 +293,11 @@ module.exports = {
                 await connection.query(updateDeadlineQuery, [deadline, postIdx]);
             }
             if(ageCategory)
-                await connection.query(UpdateAgeCategoryQuery, [ageCategory, postIdx]);
+                await connection.query(updateAgeCategoryQuery, [ageCategory, postIdx]);
             if(areaCategory)
-                await connection.query(UpdateAreaCategoryQuery, [areaCategory, postIdx]);
+                await connection.query(updateAreaCategoryQuery, [areaCategory, postIdx]);
             if(clothCategory)
-                await connection.query(UpdateClothCategoryQuery, [clothCategory, postIdx]);
+                await connection.query(updateClothCategoryQuery, [clothCategory, postIdx]);
             console.log(postImages);
             if(postImages.length != 0)
             {
@@ -308,5 +308,30 @@ module.exports = {
             }
         })
         return updateTransaction;
+    },
+    DeletePost: async(postIdx) => {
+        const deletePostQuery = 'DELETE FROM post WHERE post.postIdx = ?';
+        const deleteAgeCategoryQuery = `
+        DELETE FROM ageCategory WHERE
+        ageCategory.ageCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT ageCategory.ageCategoryIdx FROM ageCategory, postAgeCategory
+        WHERE postAgeCategory.ageCategoryIdx = ageCategory.ageCategoryIdx
+        AND postAgeCategory.postIdx = ?) AS result);`;
+        const deleteAreaCategoryQuery = `
+        DELETE FROM areaCategory WHERE
+        areaCategory.areaCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT areaCategory.areaCategoryIdx FROM areaCategory, postAreaCategory
+        WHERE postAreaCategory.areaCategoryIdx = areaCategory.areaCategoryIdx
+        AND postAreaCategory.postIdx = ?) AS result);`;
+        const deleteClothCategoryQuery = `
+        DELETE FROM clothCategory WHERE
+        clothCategory.clothCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT clothCategory.clothCategoryIdx FROM clothCategory, postClothCategory
+        WHERE postClothCategory.clothCategoryIdx = clothCategory.clothCategoryIdx
+        AND postClothCategory.postIdx = ?) AS result);`;
+
     }
 }

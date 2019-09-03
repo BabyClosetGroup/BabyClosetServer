@@ -39,7 +39,7 @@ module.exports = {
     FAIL_UPDATED_X: (X) => `${X} 수정 실패`,
     REMOVED_X: (X) => `${X} 삭제 성공`,
     FAIL_REMOVED_X: (X) => `${X} 삭제 실패`,
-    NO_X: (X) => `존재하지 않는 ${X} 입니다.`,
-    ALREADY_X: (X) => `존재하는 ${X} 입니다.`,
+    NO_X: (X) => `존재하지 않는 ${X}입니다.`,
+    ALREADY_X: (X) => `존재하는 ${X}입니다.`,
     OK_NO_X: (X) => `${X}내역이 존재하지 않습니다.`,
 }
