@@ -339,5 +339,15 @@ module.exports = {
             await connection.query(deletePostQuery, [postIdx]);
         })
         return deleteTransaction;
+    },
+    QRCodePost : async(userIdx) => {
+        const selectPostQuery = 
+        `SELECT selectedPost.postIdx, selectedPost.postTitle, selectedPost.mainImage, area.areaName FROM
+        (SELECT postIdx, postTitle, mainImage FROM post WHERE isShared = 0 AND userIdx = ${userIdx}) AS selectedPost,
+        (SELECT postAreaCategory.postIdx, areaCategory.areaName
+        FROM areaCategory, postAreaCategory WHERE areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx) AS area
+        WHERE selectedPost.postIdx = area.postIdx`;
+        const selectPostResult = await db.queryParam_None(selectPostQuery);
+        return selectPostResult;
     }
 }
