@@ -1,4 +1,6 @@
 const db = require('../../modules/utils/db/pool');
+const moment = require('moment');
+
 const makeAreaWhereQuery = (arr) => {
     for(i=0; i<arr.length; i++)
     {
@@ -263,5 +265,54 @@ module.exports = {
         ON categories.postIdx = detail.postIdx ORDER BY deadline LIMIT 8 OFFSET ${offset}`;
         const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
         return selectFilteredPostResult;
+    },
+    UpdatePost: async(title, content, deadline, areaCategory, ageCategory, clothCategory, postImages, postIdx) => {
+        // title, content, deadline, areaCategory, ageCategory, clothCategory, postImages
+        const title = title;
+        const content = content;
+        let deadline = deadline;
+        const areaCategory = areaCategory;
+        const ageCategory = ageCategory;
+        const clothCategory = clothCategory;
+        const postImages = postImages;
+        const postIdx = postIdx;
+        const UpdateAgeCategoryQuery = `UPDATE ageCategory JOIN postAgeCategory
+        ON ageCategory.ageCategoryIdx = postAgeCategory.ageCategoryIdx
+        SET ageCategory.ageName = ? where postAgeCategory.postIdx = ?`;
+        const UpdateAreaCategoryQuery = `UPDATE areaCategory JOIN postAreaCategory
+        ON areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx
+        SET areaCategory.areaName = ? where postAreaCategory.postIdx = ?`;
+        const UpdateClothCategoryQuery = `UPDATE clothCategory JOIN postClothCategory
+        ON clothCategory.clothCategoryIdx = postClothCategory.clothCategoryIdx
+        SET clothCategory.clothName = ? where postClothCategory.postIdx = ?`;
+        const updateTitleQuery = 'UPDATE post SET postTitle = ? WHERE post.postIdx = ?';
+        const updateContentQuery = 'UPDATE post SET postContent = ? WHERE post.postIdx = ?';
+        const updateDeadlineQuery = 'UPDATE post SET deadline = ? WHERE post.postIdx = ?';
+        const deleteImagesQuery = 'DELETE FROM postImage WHERE postImage.postIdx = ?';
+        const insertImagesQuery = 'INSERT INTO postImage (postImage, postIdx) VALUES (?, ?)';
+        const updateTransaction = await db.Transaction(async(connection) => {
+            if(title)
+                await connection.query(updateTitleQuery, [title, postIdx]);
+            if(content)
+                await connection.query(updateContentQuery, [content, postIdx]);
+            if(deadline)
+            {
+                deadline = moment().add(req.body.deadline.substring(0,1), 'days').format('YYYY-MM-DD');
+                await connection.query(updateDeadlineQuery, [deadline, postIdx]);
+            }
+            if(ageCategory)
+                await connection.query(UpdateAgeCategoryQuery, [ageCategory, postIdx]);
+            if(areaCategory)
+                await connection.query(UpdateAreaCategoryQuery, [areaCategory, postIdx]);
+            if(clothCategory)
+                await connection.query(UpdateClothCategoryQuery, [clothCategory, postIdx]);
+            if(profileImage)
+            {
+                await connection.query(deleteImagesQuery, [postIdx]);
+                for(i=0; i<postImages.length ;i++)
+                    await connection.query(insertImagesQuery, [postImages[i].location, postIdx]);
+            }
+        })
+        return updateTransaction;
     }
 }
