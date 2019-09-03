@@ -7,6 +7,7 @@ const upload = require('../../config/multer')
 router.get('/main', PostController.GetMainPost);
 router.get('/all/:pagination', PostController.GetAllPost);
 router.get('/deadline/:pagination', PostController.GetDeadlinePost);
+router.get('/qrcode', authUtil.isLoggedIn, PostController.SelectPostForQRCode);
 router.get('/:postIdx', PostController.GetPostDetail);
 router.post('/filter/all/:pagination', PostController.GetFilteredAllPost);
 router.post('/filter/deadline/:pagination', PostController.GetFilteredDeadlinePost);
