@@ -310,7 +310,6 @@ module.exports = {
         return updateTransaction;
     },
     DeletePost: async(postIdx) => {
-        const deletePostQuery = 'DELETE FROM post WHERE post.postIdx = ?';
         const deleteAgeCategoryQuery = `
         DELETE FROM ageCategory WHERE
         ageCategory.ageCategoryIdx IN 
@@ -332,6 +331,13 @@ module.exports = {
         (SELECT clothCategory.clothCategoryIdx FROM clothCategory, postClothCategory
         WHERE postClothCategory.clothCategoryIdx = clothCategory.clothCategoryIdx
         AND postClothCategory.postIdx = ?) AS result);`;
-
+        const deletePostQuery = 'DELETE FROM post WHERE post.postIdx = ?';
+        const deleteTransaction = await db.Transaction(async(connection) => {
+            await connection.query(deleteAgeCategoryQuery, [postIdx]);
+            await connection.query(deleteAreaCategoryQuery, [postIdx]);
+            await connection.query(deleteClothCategoryQuery, [postIdx]);
+            await connection.query(deletePostQuery, [postIdx]);
+        })
+        return deleteTransaction;
     }
 }

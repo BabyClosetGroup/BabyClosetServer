@@ -195,12 +195,25 @@ module.exports = {
         const postImages = req.files;
         const postIdx = req.params.postIdx;
         updateTransaction = await postAccessObject.UpdatePost(title, content, deadline, areaCategory, ageCategory, clothCategory, postImages, postIdx);
-        if (!updateTransaction) {
+        if (!updateTransaction)
+        {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('게시물')));
         }
         else
         {
         res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('게시물')));
+        }
+    },
+    DeletePost: async(req, res) => {
+        const postIdx = req.params.postIdx;
+        deleteTransaction = await postAccessObject.DeletePost(postIdx);
+        if(!deleteTransaction)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_REMOVED_X('게시물')));
+        }
+        else
+        {
+        res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.REMOVED_X('게시물')));
         }
     }
 }  
