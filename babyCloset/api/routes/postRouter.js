@@ -11,5 +11,6 @@ router.get('/:postIdx', PostController.GetPostDetail);
 router.post('/filter/all/:pagination', PostController.GetFilteredAllPost);
 router.post('/filter/deadline/:pagination', PostController.GetFilteredDeadlinePost);
 router.post('/', upload.array('postImages'), authUtil.isLoggedIn, PostController.RegisterPost);
+router.put('/:postIdx', upload.array('postImages'), authUtil.isLoggedIn, PostController.UpdatePost);
 
 module.exports = router;

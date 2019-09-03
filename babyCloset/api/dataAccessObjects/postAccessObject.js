@@ -267,15 +267,6 @@ module.exports = {
         return selectFilteredPostResult;
     },
     UpdatePost: async(title, content, deadline, areaCategory, ageCategory, clothCategory, postImages, postIdx) => {
-        // title, content, deadline, areaCategory, ageCategory, clothCategory, postImages
-        const title = title;
-        const content = content;
-        let deadline = deadline;
-        const areaCategory = areaCategory;
-        const ageCategory = ageCategory;
-        const clothCategory = clothCategory;
-        const postImages = postImages;
-        const postIdx = postIdx;
         const UpdateAgeCategoryQuery = `UPDATE ageCategory JOIN postAgeCategory
         ON ageCategory.ageCategoryIdx = postAgeCategory.ageCategoryIdx
         SET ageCategory.ageName = ? where postAgeCategory.postIdx = ?`;
@@ -290,6 +281,7 @@ module.exports = {
         const updateDeadlineQuery = 'UPDATE post SET deadline = ? WHERE post.postIdx = ?';
         const deleteImagesQuery = 'DELETE FROM postImage WHERE postImage.postIdx = ?';
         const insertImagesQuery = 'INSERT INTO postImage (postImage, postIdx) VALUES (?, ?)';
+        const updateMainImageQuery = 'UPDATE post SET mainImage = ? WHERE post.postIdx = ?';
         const updateTransaction = await db.Transaction(async(connection) => {
             if(title)
                 await connection.query(updateTitleQuery, [title, postIdx]);
@@ -297,7 +289,7 @@ module.exports = {
                 await connection.query(updateContentQuery, [content, postIdx]);
             if(deadline)
             {
-                deadline = moment().add(req.body.deadline.substring(0,1), 'days').format('YYYY-MM-DD');
+                deadline = moment().add(deadline.substring(0,1), 'days').format('YYYY-MM-DD');
                 await connection.query(updateDeadlineQuery, [deadline, postIdx]);
             }
             if(ageCategory)
@@ -306,11 +298,13 @@ module.exports = {
                 await connection.query(UpdateAreaCategoryQuery, [areaCategory, postIdx]);
             if(clothCategory)
                 await connection.query(UpdateClothCategoryQuery, [clothCategory, postIdx]);
-            if(profileImage)
+            console.log(postImages);
+            if(postImages.length != 0)
             {
                 await connection.query(deleteImagesQuery, [postIdx]);
                 for(i=0; i<postImages.length ;i++)
                     await connection.query(insertImagesQuery, [postImages[i].location, postIdx]);
+                await connection.query(updateMainImageQuery, [postImages[0].location, postIdx]);
             }
         })
         return updateTransaction;
