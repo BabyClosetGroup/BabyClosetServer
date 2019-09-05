@@ -11,4 +11,9 @@ module.exports = {
         });
         return updateTransaction;
     },
+    GetRating : async (userIdx) => {
+        const getRatingQuery =  'SELECT userIdx, nickname, rating FROM user WHERE userIdx = ?';
+        const getRatingResult = db.queryParam_Arr(getRatingQuery, [userIdx]);
+        return getRatingResult;
+    }
 }
