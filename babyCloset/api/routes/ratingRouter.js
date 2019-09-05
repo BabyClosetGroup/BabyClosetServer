@@ -5,5 +5,4 @@ const RatingController = require('../controllers/ratingController');
 
 // router.get('/', authUtil.isLoggedIn, RatingController.GetRating);
 router.post('/', authUtil.isLoggedIn, RatingController.PostRating);
-
 module.exports = router;
