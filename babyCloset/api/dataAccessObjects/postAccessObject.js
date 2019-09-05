@@ -1,4 +1,6 @@
 const db = require('../../modules/utils/db/pool');
+const moment = require('moment');
+
 const makeAreaWhereQuery = (arr) => {
     for(i=0; i<arr.length; i++)
     {
@@ -263,5 +265,89 @@ module.exports = {
         ON categories.postIdx = detail.postIdx ORDER BY deadline LIMIT 8 OFFSET ${offset}`;
         const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
         return selectFilteredPostResult;
+    },
+    UpdatePost: async(title, content, deadline, areaCategory, ageCategory, clothCategory, postImages, postIdx) => {
+        const updateAgeCategoryQuery = `UPDATE ageCategory JOIN postAgeCategory
+        ON ageCategory.ageCategoryIdx = postAgeCategory.ageCategoryIdx
+        SET ageCategory.ageName = ? where postAgeCategory.postIdx = ?`;
+        const updateAreaCategoryQuery = `UPDATE areaCategory JOIN postAreaCategory
+        ON areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx
+        SET areaCategory.areaName = ? where postAreaCategory.postIdx = ?`;
+        const updateClothCategoryQuery = `UPDATE clothCategory JOIN postClothCategory
+        ON clothCategory.clothCategoryIdx = postClothCategory.clothCategoryIdx
+        SET clothCategory.clothName = ? where postClothCategory.postIdx = ?`;
+        const updateTitleQuery = 'UPDATE post SET postTitle = ? WHERE post.postIdx = ?';
+        const updateContentQuery = 'UPDATE post SET postContent = ? WHERE post.postIdx = ?';
+        const updateDeadlineQuery = 'UPDATE post SET deadline = ? WHERE post.postIdx = ?';
+        const deleteImagesQuery = 'DELETE FROM postImage WHERE postImage.postIdx = ?';
+        const insertImagesQuery = 'INSERT INTO postImage (postImage, postIdx) VALUES (?, ?)';
+        const updateMainImageQuery = 'UPDATE post SET mainImage = ? WHERE post.postIdx = ?';
+        const updateTransaction = await db.Transaction(async(connection) => {
+            if(title)
+                await connection.query(updateTitleQuery, [title, postIdx]);
+            if(content)
+                await connection.query(updateContentQuery, [content, postIdx]);
+            if(deadline)
+            {
+                deadline = moment().add(deadline.substring(0,1), 'days').format('YYYY-MM-DD');
+                await connection.query(updateDeadlineQuery, [deadline, postIdx]);
+            }
+            if(ageCategory)
+                await connection.query(updateAgeCategoryQuery, [ageCategory, postIdx]);
+            if(areaCategory)
+                await connection.query(updateAreaCategoryQuery, [areaCategory, postIdx]);
+            if(clothCategory)
+                await connection.query(updateClothCategoryQuery, [clothCategory, postIdx]);
+            console.log(postImages);
+            if(postImages.length != 0)
+            {
+                await connection.query(deleteImagesQuery, [postIdx]);
+                for(i=0; i<postImages.length ;i++)
+                    await connection.query(insertImagesQuery, [postImages[i].location, postIdx]);
+                await connection.query(updateMainImageQuery, [postImages[0].location, postIdx]);
+            }
+        })
+        return updateTransaction;
+    },
+    DeletePost: async(postIdx) => {
+        const deleteAgeCategoryQuery = `
+        DELETE FROM ageCategory WHERE
+        ageCategory.ageCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT ageCategory.ageCategoryIdx FROM ageCategory, postAgeCategory
+        WHERE postAgeCategory.ageCategoryIdx = ageCategory.ageCategoryIdx
+        AND postAgeCategory.postIdx = ?) AS result);`;
+        const deleteAreaCategoryQuery = `
+        DELETE FROM areaCategory WHERE
+        areaCategory.areaCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT areaCategory.areaCategoryIdx FROM areaCategory, postAreaCategory
+        WHERE postAreaCategory.areaCategoryIdx = areaCategory.areaCategoryIdx
+        AND postAreaCategory.postIdx = ?) AS result);`;
+        const deleteClothCategoryQuery = `
+        DELETE FROM clothCategory WHERE
+        clothCategory.clothCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT clothCategory.clothCategoryIdx FROM clothCategory, postClothCategory
+        WHERE postClothCategory.clothCategoryIdx = clothCategory.clothCategoryIdx
+        AND postClothCategory.postIdx = ?) AS result);`;
+        const deletePostQuery = 'DELETE FROM post WHERE post.postIdx = ?';
+        const deleteTransaction = await db.Transaction(async(connection) => {
+            await connection.query(deleteAgeCategoryQuery, [postIdx]);
+            await connection.query(deleteAreaCategoryQuery, [postIdx]);
+            await connection.query(deleteClothCategoryQuery, [postIdx]);
+            await connection.query(deletePostQuery, [postIdx]);
+        })
+        return deleteTransaction;
+    },
+    QRCodePost : async(userIdx) => {
+        const selectPostQuery = 
+        `SELECT selectedPost.postIdx, selectedPost.postTitle, selectedPost.mainImage, area.areaName FROM
+        (SELECT postIdx, postTitle, mainImage FROM post WHERE isShared = 0 AND userIdx = ${userIdx}) AS selectedPost,
+        (SELECT postAreaCategory.postIdx, areaCategory.areaName
+        FROM areaCategory, postAreaCategory WHERE areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx) AS area
+        WHERE selectedPost.postIdx = area.postIdx`;
+        const selectPostResult = await db.queryParam_None(selectPostQuery);
+        return selectPostResult;
     }
 }

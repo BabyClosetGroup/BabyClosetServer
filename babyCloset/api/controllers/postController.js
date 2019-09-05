@@ -183,5 +183,52 @@ module.exports = {
                 filteredDeadlinePost : getFilteredPost
             }));
         }
+    },
+    UpdatePost: async(req, res) => {
+        // title, content, deadline, areaCategory, ageCategory, clothCategory, postImages
+        const title = req.body.title;
+        const content = req.body.content;
+        let deadline = req.body.deadline;
+        const areaCategory = req.body.areaCategory;
+        const ageCategory = req.body.ageCategory;
+        const clothCategory = req.body.clothCategory;
+        const postImages = req.files;
+        const postIdx = req.params.postIdx;
+        updateTransaction = await postAccessObject.UpdatePost(title, content, deadline, areaCategory, ageCategory, clothCategory, postImages, postIdx);
+        if (!updateTransaction)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('게시물')));
+        }
+        else
+        {
+        res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('게시물')));
+        }
+    },
+    DeletePost: async(req, res) => {
+        const postIdx = req.params.postIdx;
+        deleteTransaction = await postAccessObject.DeletePost(postIdx);
+        if(!deleteTransaction)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_REMOVED_X('게시물')));
+        }
+        else
+        {
+        res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.REMOVED_X('게시물')));
+        }
+    },
+    SelectPostForQRCode: async(req, res) => {
+        const userIdx = req.decoded.userIdx;
+        selectPost = await postAccessObject.QRCodePost(userIdx);
+        if(!selectPost)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+            {
+                allPost : selectPost
+            }));
+        }
     }
 }  
