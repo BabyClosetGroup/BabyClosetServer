@@ -36,6 +36,29 @@ module.exports = {
         })
         return insertTransaction;
     },
+
+    PostNoteWithUpdatingNoteManagement : async (noteContent, senderIdx, receiverIdx, createdTime) => {
+        let olderUserIdx;
+        let youngerUserIdx;
+        if(senderIdx > receiverIdx)
+        {
+            olderUserIdx = receiverIdx;
+            youngerUserIdx = senderIdx;
+        }
+        else
+        {
+            olderUserIdx = senderIdx;
+            youngerUserIdx = receiverIdx;
+        }
+        const insertNoteQuery = 'INSERT INTO note (noteContent, senderIdx, receiverIdx, createdTime) VALUES (?, ?, ?, ?)';
+        const updateNoteManagementQuery = `UPDATE noteManagement SET lastContent = ?, createdTime = ?
+        WHERE olderUserIdx = ? AND youngerUserIdx = ?`;
+        const insertTransaction = await db.Transaction(async(connection) => {
+            await connection.query(insertNoteQuery, [noteContent, senderIdx, receiverIdx, createdTime]);
+            await connection.query(updateNoteManagementQuery, [noteContent, createdTime, olderUserIdx, youngerUserIdx]);
+        })
+        return insertTransaction;
+    },
     
     GetNotesWithSpecificUser : async (userIdx1, userIdx2) => {
         const getNotesQuery = `
