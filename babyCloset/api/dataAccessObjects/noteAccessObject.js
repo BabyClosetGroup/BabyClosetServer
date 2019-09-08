@@ -6,7 +6,7 @@ module.exports = {
         let checkNoteManagementResult;
         if(senderIdx > receiverIdx)
         {
-           checkNoteManagementResult = await db.queryParam_Arr(checkNoteManagementQuery, [receiverIdx, senderIdx]);
+            checkNoteManagementResult = await db.queryParam_Arr(checkNoteManagementQuery, [receiverIdx, senderIdx]);
         }
         else
         {
@@ -60,23 +60,22 @@ module.exports = {
         return insertTransaction;
     },
     
-    GetNotesWithSpecificUser : async (userIdx1, userIdx2) => {
+    GetNotesWithSpecificUser : async (loggedInUser, counterpart) => {
         const getNotesQuery = `
         SELECT filteredNote.noteIdx, filteredNote.senderIdx, filteredNote.noteContent, filteredNote.createdTime, user.nickname
         FROM user,
         (SELECT noteIdx, noteContent, senderIdx, receiverIdx, createdTime
         FROM note
-        WHERE (senderIdx = ${userIdx1} and receiverIdx=${userIdx2}) OR (senderIdx = ${userIdx2} and receiverIdx = ${userIdx1})
+        WHERE (senderIdx = ? and receiverIdx= ?) OR (senderIdx = ? and receiverIdx = ?)
         ORDER BY createdTime DESC)
         AS filteredNote 
         WHERE user.userIdx = filteredNote.receiverIdx`;
-        const getNotes = await db.queryParam_None(getNotesQuery);
+        const getNotes = await db.queryParam_Arr(getNotesQuery, [loggedInUser, counterpart, counterpart, loggedInUser]);
         return getNotes;
     },
-    UpdateReadBit : async(userIdx1, userIdx2) => {
-        const updateIsRead = `UPDATE note SET isRead=1 WHERE isREAD <> 1 AND (senderIdx = ${userIdx1} AND receiverIdx=${userIdx2})
-        OR (senderIdx = ${userIdx2} AND receiverIdx= ${userIdx1})`;
-        const updateResult = await db.queryParam_None(updateIsRead);
+    UpdateReadBit : async(loggedInUser, counterpart) => {
+        const updateIsRead = `UPDATE note SET isRead=1 WHERE isREAD <> 1 AND (senderIdx = ? AND receiverIdx= ?)`;
+        const updateResult = await db.queryParam_Arr(updateIsRead, [counterpart, loggedInUser]);
         return updateResult;
     },
     GetCounterpartNickname : async(userIdx) => {

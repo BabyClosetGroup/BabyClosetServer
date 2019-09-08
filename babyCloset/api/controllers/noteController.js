@@ -23,7 +23,7 @@ module.exports = {
             {
                 if(checkNoteManagement.length==0)
                 {
-                    const insertNote = await noteAccessObject.PostNote(noteContent, senderIdx, receiverIdx, createdTime)
+                    const insertNote = await noteAccessObject.PostNoteWithNewNoteManagement(noteContent, senderIdx, receiverIdx, createdTime)
                     if (!insertNote) {
                     res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('쪽지')));
                     } else {
@@ -32,7 +32,7 @@ module.exports = {
                 }
                 else
                 {
-                    const insertNote = await noteAccessObject.PostNote(noteContent, senderIdx, receiverIdx, createdTime)
+                    const insertNote = await noteAccessObject.PostNoteWithUpdatingNoteManagement(noteContent, senderIdx, receiverIdx, createdTime)
                     if (!insertNote) {
                     res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('쪽지')));
                     } else {
@@ -54,7 +54,7 @@ module.exports = {
             const getNotes = await noteAccessObject.GetNotesWithSpecificUser(loggedInUser, counterpart);
             const updateReadBit = await noteAccessObject.UpdateReadBit(loggedInUser, counterpart);
             const getCounterpartNickname = await noteAccessObject.GetCounterpartNickname(counterpart);
-            console.log(getCounterpartNickname);
+            console.log(getNotes);
             if (!getNotes || !updateReadBit || !getCounterpartNickname) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
             }
