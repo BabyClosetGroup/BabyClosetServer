@@ -75,5 +75,8 @@ module.exports = {
                 }));
             }
         }
+    },
+    GetNotesWithAllUsers : async(req, res) => {
+
     }
 }

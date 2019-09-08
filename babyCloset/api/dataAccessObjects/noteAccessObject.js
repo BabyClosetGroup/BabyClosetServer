@@ -82,6 +82,12 @@ module.exports = {
         const getCounterpartNickname = `SELECT userIdx, nickname FROM user where userIdx = ${userIdx}`;
         const getNickname = await db.queryParam_None(getCounterpartNickname);
         return getNickname;
+    },
+    GetNoteWithAllUsers : async(userIdx) => {
+        const selectNotes = `SELECT olderUserIdx, youngerUserIdx, lastContent, createdTime FROM noteManagement
+        WHERE olderUserIdx = ? OR youngerUserIdx = ?`;
+        const selectNotesResult = await db.queryParam_Arr(selectNotes, [userIdx, userIdx]);
+        return selectNotesResult;
     }
 }
 
