@@ -63,7 +63,6 @@ module.exports = {
     },
     GetCompleted: async(req, res) => {
         const userIdx = req.decoded.userIdx;
-        console.log(userIdx);
         const getCompletedResult = await shareAccessObject.GetCompletedShare(userIdx);
         if (!getCompletedResult)
         {
@@ -71,7 +70,6 @@ module.exports = {
         }
         else
         {
-            console.log(getCompletedResult)
             const filteredPost = getCompletedResult.map(post => {
                 post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');
                 return post
@@ -81,4 +79,18 @@ module.exports = {
             }));
         }
     },
+    GetReceived: async(req, res) => {
+        const userIdx = req.decoded.userIdx;
+        const getReceivedResult = await shareAccessObject.GetReceivedShare(userIdx);
+        if (!getReceivedResult)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'), {
+                allPost: getReceivedResult
+            }));
+        }
+    }
 }
