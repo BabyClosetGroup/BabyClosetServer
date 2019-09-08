@@ -20,14 +20,14 @@ module.exports = {
         const selectPostResult = db.queryParam_Arr(selectPostQuery, [userIdx]);
         return selectPostResult;
     },
-    GetDetailUncompletedShare : async(userIdx, postIdx) => {
+    GetDetailUncompletedShare : async(postIdx) => {
         const selectPostQuery = 
         `SELECT selectedPost.postIdx, selectedPost.postTitle, selectedPost.mainImage, area.areaName, selectedPost.registerNumber FROM
-        (SELECT postIdx, postTitle, mainImage, registerNumber FROM post WHERE isShared = 0 AND userIdx = ? AND postIdx = ?)  AS selectedPost,
+        (SELECT postIdx, postTitle, mainImage, registerNumber FROM post WHERE postIdx = ? AND isShared = 0)  AS selectedPost,
         (SELECT postAreaCategory.postIdx, areaCategory.areaName
         FROM areaCategory, postAreaCategory WHERE areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx) AS area
         WHERE selectedPost.postIdx = area.postIdx`;
-        const selectPostResult = db.queryParam_Arr(selectPostQuery, [userIdx, postIdx]);
+        const selectPostResult = db.queryParam_Arr(selectPostQuery, [postIdx]);
         return selectPostResult;
     },
     GetApplicantInformation : async(postIdx) => {

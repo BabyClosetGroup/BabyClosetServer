@@ -43,5 +43,25 @@ module.exports = {
                 allPost: filteredPost
             }));
         }
+    },
+    GetApplicant: async(req, res) => {
+        const postIdx = req.params.postIdx;
+        const userIdx = req.decoded.userIdx;
+        const getPostResult = await shareAccessObject.GetDetailUncompletedShare(postIdx);
+        const getApplicantResult = await shareAccessObject.GetApplicantInformation(postIdx);
+        console.log(getPostResult)
+        console.log(getApplicantResult)
+
+        if(!getPostResult || !getApplicantResult)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('신청자')));
+        }
+        else
+        {
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('신청자'), {
+                post: getPostResult[0],
+                applicants: getApplicantResult
+            }));
+        }
     }
 }
