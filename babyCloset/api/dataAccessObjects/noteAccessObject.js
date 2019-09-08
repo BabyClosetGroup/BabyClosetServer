@@ -93,6 +93,11 @@ module.exports = {
         const getUnreadNotesCount = 'SELECT count(*) as cnt FROM note WHERE senderIdx=? AND receiverIdx = ? AND isRead = 0';
         const getCountResult = await db.queryParam_Arr(getUnreadNotesCount, [senderIdx, receiverIdx]);
         return getCountResult;
+    },
+    ConfirmNewMessage : async(userIdx) => {
+        const confirmNewMessage = 'SELECT noteIdx FROM note WHERE receiverIdx = ? AND isRead = 0';
+        const confirmNewMessageResult = await db.queryParam_Arr(confirmNewMessage, [userIdx]);
+        return confirmNewMessageResult;
     }
 }
 
