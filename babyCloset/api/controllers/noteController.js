@@ -16,11 +16,29 @@ module.exports = {
         }
         else
         {
-            const insertNote = await noteAccessObject.PostNote(noteContent, senderIdx, receiverIdx, createdTime)
-            if (!insertNote) {
+            const checkNoteManagement = await noteAccessObject.CheckNoteManagement(senderIdx, receiverIdx);
+            if(!checkNoteManagement)
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('쪽지')));
-            } else {
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('쪽지')));
+            else
+            {
+                if(checkNoteManagement.length==0)
+                {
+                    const insertNote = await noteAccessObject.PostNoteWithNewNoteManagement(noteContent, senderIdx, receiverIdx, createdTime)
+                    if (!insertNote) {
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('쪽지')));
+                    } else {
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('쪽지')));
+                    }
+                }
+                else
+                {
+                    const insertNote = await noteAccessObject.PostNoteWithUpdatingNoteManagement(noteContent, senderIdx, receiverIdx, createdTime)
+                    if (!insertNote) {
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('쪽지')));
+                    } else {
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('쪽지')));
+                    }
+                }
             }
         }
     },
@@ -36,7 +54,7 @@ module.exports = {
             const getNotes = await noteAccessObject.GetNotesWithSpecificUser(loggedInUser, counterpart);
             const updateReadBit = await noteAccessObject.UpdateReadBit(loggedInUser, counterpart);
             const getCounterpartNickname = await noteAccessObject.GetCounterpartNickname(counterpart);
-            console.log(getCounterpartNickname);
+            console.log(getNotes);
             if (!getNotes || !updateReadBit || !getCounterpartNickname) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
             }
@@ -56,6 +74,29 @@ module.exports = {
                     messages : filteredNotes
                 }));
             }
+        }
+    },
+    GetNotesWithAllUsers : async(req, res) => {
+        const userIdx = req.decoded.userIdx;
+        const getNotes = await noteAccessObject.GetNoteWithAllUsers(userIdx);
+        if(!getNotes)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
+        else
+        {
+            console.log('xx', getNotes)
+            for(i=0; i<getNotes.length ;i++)
+            {
+                let counterpartIdx;
+                if(getNotes[i].olderUserIdx == userIdx)
+                    counterpartIdx = getNotes[i].youngerUserIdx;
+                else
+                    counterpartIdx = getNotes[i].olderUserIdx;
+                const cnt = await noteAccessObject.GetUnreadNotesCount(counterpartIdx, userIdx);
+                getNotes[i].unreadCount = "+"+cnt[0].cnt;
+            }
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('쪽지'), {
+                getNotes
+            }));
         }
     }
 }
