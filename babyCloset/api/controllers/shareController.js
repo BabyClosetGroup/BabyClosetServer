@@ -46,7 +46,6 @@ module.exports = {
     },
     GetApplicant: async(req, res) => {
         const postIdx = req.params.postIdx;
-        const userIdx = req.decoded.userIdx;
         const getPostResult = await shareAccessObject.GetDetailUncompletedShare(postIdx);
         const getApplicantResult = await shareAccessObject.GetApplicantInformation(postIdx);
         console.log(getPostResult)
