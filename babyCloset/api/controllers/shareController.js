@@ -88,8 +88,12 @@ module.exports = {
         }
         else
         {
+            const filteredPost = getReceivedResult.map(post => {
+                post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');
+                return post
+            })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'), {
-                allPost: getReceivedResult
+                allPost: filteredPost
             }));
         }
     }
