@@ -16,11 +16,29 @@ module.exports = {
         }
         else
         {
-            const insertNote = await noteAccessObject.PostNote(noteContent, senderIdx, receiverIdx, createdTime)
-            if (!insertNote) {
+            const checkNoteManagement = await noteAccessObject.CheckNoteManagement(senderIdx, receiverIdx);
+            if(!checkNoteManagement)
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('쪽지')));
-            } else {
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('쪽지')));
+            else
+            {
+                if(checkNoteManagement.length==0)
+                {
+                    const insertNote = await noteAccessObject.PostNote(noteContent, senderIdx, receiverIdx, createdTime)
+                    if (!insertNote) {
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('쪽지')));
+                    } else {
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('쪽지')));
+                    }
+                }
+                else
+                {
+                    const insertNote = await noteAccessObject.PostNote(noteContent, senderIdx, receiverIdx, createdTime)
+                    if (!insertNote) {
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('쪽지')));
+                    } else {
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('쪽지')));
+                    }
+                }
             }
         }
     },
