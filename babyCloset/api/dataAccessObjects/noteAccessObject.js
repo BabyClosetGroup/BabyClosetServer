@@ -88,6 +88,11 @@ module.exports = {
         WHERE olderUserIdx = ? OR youngerUserIdx = ?`;
         const selectNotesResult = await db.queryParam_Arr(selectNotes, [userIdx, userIdx]);
         return selectNotesResult;
+    },
+    GetUnreadNotesCount : async(senderIdx, receiverIdx) => {
+        const getUnreadNotesCount = 'SELECT count(*) as cnt FROM note WHERE senderIdx=? AND receiverIdx = ? AND isRead = 0';
+        const getCountResult = await db.queryParam_Arr(getUnreadNotesCount, [senderIdx, receiverIdx]);
+        return getCountResult;
     }
 }
 

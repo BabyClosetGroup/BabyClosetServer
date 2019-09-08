@@ -77,6 +77,26 @@ module.exports = {
         }
     },
     GetNotesWithAllUsers : async(req, res) => {
-
+        const userIdx = req.decoded.userIdx;
+        const getNotes = await noteAccessObject.GetNoteWithAllUsers(userIdx);
+        if(!getNotes)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
+        else
+        {
+            console.log('xx', getNotes)
+            for(i=0; i<getNotes.length ;i++)
+            {
+                let counterpartIdx;
+                if(getNotes[i].olderUserIdx == userIdx)
+                    counterpartIdx = getNotes[i].youngerUserIdx;
+                else
+                    counterpartIdx = getNotes[i].olderUserIdx;
+                const cnt = await noteAccessObject.GetUnreadNotesCount(counterpartIdx, userIdx);
+                getNotes[i].unreadCount = "+"+cnt[0].cnt;
+            }
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('쪽지'), {
+                getNotes
+            }));
+        }
     }
 }
