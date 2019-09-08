@@ -1,6 +1,19 @@
 const db = require('../../modules/utils/db/pool');
 
 module.exports = {
+    CheckNoteManagement : async(senderIdx, receiverIdx) => {
+        const checkNoteManagementQuery = 'SELECT noteManagementIdx FROM noteManagement where olderUserIdx = ? AND youngerUserIdx = ?';
+        let checkNoteManagementResult;
+        if(senderIdx > receiverIdx)
+        {
+           checkNoteManagementResult = await db.queryParam_Arr(checkNoteManagementQuery, [receiverIdx, senderIdx]);
+        }
+        else
+        {
+            checkNoteManagementResult = await db.queryParam_Arr(checkNoteManagementQuery, [senderIdx, receiverIdx]);
+        }
+        return checkNoteManagementResult;
+    },
     PostNote : async (noteContent, senderIdx, receiverIdx, createdTime) => {
         const insertNoteQuery = 'INSERT INTO note (noteContent, senderIdx, receiverIdx, createdTime) VALUES (?, ?, ?, ?)';
         const insertNoteResult = await db.queryParam_Arr(insertNoteQuery, [noteContent, senderIdx, receiverIdx, createdTime]);
