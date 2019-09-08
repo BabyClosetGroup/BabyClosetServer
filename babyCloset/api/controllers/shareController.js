@@ -2,6 +2,7 @@ const resForm = require('../../modules/utils/rest/responseForm');
 const statusCode = require('../../modules/utils/rest/statusCode');
 const resMessage = require('../../modules/utils/rest/responseMessage');
 const shareAccessObject = require('../dataAccessObjects/shareAccessObject');
+const moment = require('moment');
 
 module.exports = {
     PostShare : async(req, res) => {
@@ -27,7 +28,6 @@ module.exports = {
     },
     GetUncompleted: async(req, res) => {
         const userIdx = req.decoded.userIdx;
-        console.log(userIdx);
         const getUncompletedResult = await shareAccessObject.GetUncompletedShare(userIdx);
         if (!getUncompletedResult)
         {
@@ -48,8 +48,6 @@ module.exports = {
         const postIdx = req.params.postIdx;
         const getPostResult = await shareAccessObject.GetDetailUncompletedShare(postIdx);
         const getApplicantResult = await shareAccessObject.GetApplicantInformation(postIdx);
-        console.log(getPostResult)
-        console.log(getApplicantResult)
 
         if(!getPostResult || !getApplicantResult)
         {
@@ -62,5 +60,25 @@ module.exports = {
                 applicants: getApplicantResult
             }));
         }
-    }
+    },
+    GetCompleted: async(req, res) => {
+        const userIdx = req.decoded.userIdx;
+        console.log(userIdx);
+        const getCompletedResult = await shareAccessObject.GetCompletedShare(userIdx);
+        if (!getCompletedResult)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            console.log(getCompletedResult)
+            const filteredPost = getCompletedResult.map(post => {
+                post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');
+                return post
+            })
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'), {
+                allPost: filteredPost
+            }));
+        }
+    },
 }
