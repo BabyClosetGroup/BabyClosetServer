@@ -2,8 +2,9 @@ const resForm = require('../../modules/utils/rest/responseForm');
 const statusCode = require('../../modules/utils/rest/statusCode');
 const resMessage = require('../../modules/utils/rest/responseMessage');
 const postAccessObject = require('../dataAccessObjects/postAccessObject');
+const qrCodeAccessObject = require('../dataAccessObjects/qrCodeAccessObject');
 const moment = require('moment');
-const makeQrcode = require('../../modules/utils/qrcodeGenerator');
+const qrcodeGenerator = require('../../modules/utils/qrcodeGenerator');
 
 module.exports = {
     // 받아야 할 정보 나눔 나물 이미지(여러 개), 카테고리(자치구, 나이, 옷 종류), 마감기한, 제목, 내용 
@@ -31,7 +32,16 @@ module.exports = {
             }
             else
             {
-                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('게시물')));
+                qrcodeGenerator.makeQrcode(userIdx, insertTransaction.postIdx);
+                const updateQrcode = qrCodeAccessObject.updateQrcodeImage(userIdx, insertTransaction.postIdx);
+                if(!updateQrcode)
+                {
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('게시물')));
+                }
+                else
+                {
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('게시물')));
+                }
             }
         }
     },

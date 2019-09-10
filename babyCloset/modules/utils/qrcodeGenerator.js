@@ -10,23 +10,24 @@ const s3 = new aws.S3({
 
 module.exports = {
     makeQrcode: (userIdx, postIdx) => {
-        const qrInformation = {
-            userIdx,
-            postIdx
-        }
-        qrCode.toFile( path.join(__dirname, `../../public/qrcode/${userIdx},${postIdx}.png`) ,`${qrInformation}`,
+        const qrInformation = `{
+            userIdx: ${userIdx},
+            postIdx: ${postIdx}
+        }`
+        qrCode.toFile( path.join(__dirname, `../../public/qrcode/${userIdx}and${postIdx}.png`) ,`${qrInformation}`,
         (err, string) => {
         if (err) throw err;
         s3.upload({
             'Bucket':'sopt24server',
-            'Key': `${userIdx},${postIdx}.png`,
+            'Key': `${userIdx}and${postIdx}.png`,
             'ACL':'public-read',
-            'Body':fs.createReadStream(path.join(__dirname, `../../public/qrcode/${userIdx},${postIdx}.png`)),
+            'Body':fs.createReadStream(path.join(__dirname, `../../public/qrcode/${userIdx}and${postIdx}.png`)),
             'ContentType':'image/png'
         },
             (err, data) => {
                 if (err) throw err;
-                fs.unlink(path.join(__dirname, `../../public/qrcode/$${userIdx},${postIdx}.png`), (err) => {
+                console.log('xxx', data)
+                fs.unlink(path.join(__dirname, `../../public/qrcode/${userIdx}and${postIdx}.png`), (err) => {
                 if (err) throw err;
                 });
             });
