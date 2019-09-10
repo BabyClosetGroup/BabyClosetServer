@@ -3,6 +3,7 @@ const statusCode = require('../../modules/utils/rest/statusCode');
 const resMessage = require('../../modules/utils/rest/responseMessage');
 const postAccessObject = require('../dataAccessObjects/postAccessObject');
 const moment = require('moment');
+const makeQrcode = require('../../modules/utils/qrcodeGenerator');
 
 module.exports = {
     // 받아야 할 정보 나눔 나물 이미지(여러 개), 카테고리(자치구, 나이, 옷 종류), 마감기한, 제목, 내용 
@@ -16,7 +17,6 @@ module.exports = {
         const areaName = req.body.areaCategory;
         const ageName = req.body.ageCategory;
         const clothName = req.body.clothCategory;
-        console.log(postImages);
         if(!deadline || !postTitle || !postContent || !postImages || postImages.length == 0 ||
             !areaName || !ageName|| !clothName)
         {
@@ -26,9 +26,11 @@ module.exports = {
         {
             deadline = moment().add(req.body.deadline.substring(0,1), 'days').format('YYYY-MM-DD');
             const insertTransaction = await postAccessObject.RegisterPost(postImages, postTitle, postContent, deadline, createdTime, userIdx, areaName, ageName, clothName)
-            if (!insertTransaction) {
+            if (!insertTransaction.result) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('게시물')));
-                } else {
+            }
+            else
+            {
                 res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('게시물')));
             }
         }
