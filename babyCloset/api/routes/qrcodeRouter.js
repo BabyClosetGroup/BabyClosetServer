@@ -5,6 +5,6 @@ const QrcodeController = require('../controllers/qrcodeController');
 const upload = require('../../config/multer')
 
 // router.get('/', authUtil.isLoggedIn, PostController.GetMainPost);
-router.post('/', authUtil.isLoggedIn, QrcodeController.makeQrcode);
+router.get('/:postIdx', authUtil.isLoggedIn, QrcodeController.getQrcode);
 
 module.exports = router;

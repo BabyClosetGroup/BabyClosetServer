@@ -7,7 +7,10 @@ module.exports = {
         WHERE postIdx = ?`;
         const updateQrcodeImageResult = db.queryParam_Arr(updateQrcodeImageQuery, [postIdx]);
         return updateQrcodeImageResult;
+    },
+    getQrcode : async (postIdx) => {
+        const selectQrcodeQuery = 'SELECT postIdx, postTitle, qrcode FROM post WHERE postIdx = ?';
+        const selectQrcodeResult = db.queryParam_Arr(selectQrcodeQuery, [postIdx]);
+        return selectQrcodeResult;
     }
-}
-
-//https://sopt24server.s3.ap-northeast-2.amazonaws.com/2and36.png
+} 
