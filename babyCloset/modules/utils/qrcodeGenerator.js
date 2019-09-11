@@ -10,10 +10,7 @@ const s3 = new aws.S3({
 
 module.exports = {
     makeQrcode: (userIdx, postIdx) => {
-        const qrInformation = `{
-            userIdx: ${userIdx},
-            postIdx: ${postIdx}
-        }`
+        const qrInformation = `userIdx: ${userIdx}, postIdx: ${postIdx}`;
         qrCode.toFile( path.join(__dirname, `../../public/qrcode/${userIdx}and${postIdx}.png`) ,`${qrInformation}`,
         (err, string) => {
         if (err) throw err;

@@ -12,5 +12,10 @@ module.exports = {
         const selectQrcodeQuery = 'SELECT postIdx, postTitle, qrcode FROM post WHERE postIdx = ?';
         const selectQrcodeResult = db.queryParam_Arr(selectQrcodeQuery, [postIdx]);
         return selectQrcodeResult;
+    },
+    authenticateQrcode: async (postIdx, userIdx) => {
+        const authenticateQrcodeQuery = 'SELECT postIdx, isShared FROM post WHERE postIdx = ? AND userIdx = ?';
+        const authenticateQrcodeResult = db.queryParam_Arr(authenticateQrcodeQuery, [postIdx, userIdx]);
+        return authenticateQrcodeResult;
     }
 } 
