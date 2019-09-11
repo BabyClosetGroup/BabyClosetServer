@@ -112,7 +112,7 @@ module.exports = {
         JOIN post ON
         post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day
         AND postAreaCategory.postIdx = post.postIdx)
-        AS postArea)
+        AS postArea) 
         AS postAreaImage
         On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
         ORDER BY createdTime DESC LIMIT 4`;

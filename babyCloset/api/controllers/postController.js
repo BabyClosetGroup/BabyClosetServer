@@ -2,6 +2,7 @@ const resForm = require('../../modules/utils/rest/responseForm');
 const statusCode = require('../../modules/utils/rest/statusCode');
 const resMessage = require('../../modules/utils/rest/responseMessage');
 const postAccessObject = require('../dataAccessObjects/postAccessObject');
+const noteAccessObject = require('../dataAccessObjects/noteAccessObject');
 const qrCodeAccessObject = require('../dataAccessObjects/qrCodeAccessObject');
 const moment = require('moment');
 const qrcodeGenerator = require('../../modules/utils/qrcodeGenerator');
@@ -46,14 +47,18 @@ module.exports = {
         }
     },
     GetMainPost : async(req, res) => {
+        const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
         const getDeadLinePost = await postAccessObject.GetDeadLinePost();
         const getRecentPost = await postAccessObject.GetRecentPost();
-        if(!getDeadLinePost || !getRecentPost)
+        if(!getDeadLinePost || !getRecentPost || !confirmNewMessage)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
         else
-        {   
+        {  
+            let newMessage = 0; 
+            if(confirmNewMessage.length != 0)
+                newMessage = 1;
             const filteredDeadlinePost = getDeadLinePost.map(post => {
                 if(post.postTitle.length > 8)
                     post.postTitle = post.postTitle.substring(0, 8) + "..";
@@ -67,6 +72,7 @@ module.exports = {
             })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
+                isNewMessage : newMessage,
                 deadlinePost : filteredDeadlinePost,
                 recentPost : filteredRecentPost
             }));
