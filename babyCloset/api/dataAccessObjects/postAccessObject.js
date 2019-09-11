@@ -60,9 +60,10 @@ module.exports = {
             const insertPostAreaCategoryQuery = 'INSERT INTO postAreaCategory (postIdx, areaCategoryIdx) VALUES (?, ?)';
             const insertPostAgeCategoryQuery = 'INSERT INTO postAgeCategory (postIdx, ageCategoryIdx) VALUES (?, ?)';
             const insertPostClothCategoryQuery = 'INSERT INTO postClothCategory (postIdx, clothCategoryIdx) VALUES (?, ?)';
+            let postIdx;
             const insertTransaction = await db.Transaction(async(connection) => {
                 const insertPostResult = await connection.query(insertPostQuery, [postTitle, postContent, deadline, createdTime, userIdx]);
-                const postIdx = insertPostResult.insertId;
+                postIdx = insertPostResult.insertId;
                 for(i=0; i<postImages.length ;i++)
                     await connection.query(insertPostImageQuery, [postImages[i].location, postIdx]);
                 const updateMainImageQuery = `UPDATE post SET mainImage = "${postImages[0].location}" WHERE postIdx = ?`
@@ -77,7 +78,7 @@ module.exports = {
                 await connection.query(insertPostAgeCategoryQuery, [postIdx, ageCategoryIdx]);
                 await connection.query(insertPostClothCategoryQuery, [postIdx, clothCategoryIdx]);
                 });
-            return insertTransaction;
+            return {result: insertTransaction, postIdx};
     },
     GetDeadLinePost : async () => {
         const selectDeadlinePostQuery = `
