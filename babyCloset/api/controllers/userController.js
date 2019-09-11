@@ -98,22 +98,20 @@ module.exports = {
     },
     //이름, 아이디, 비밀번호, 닉네임, 프로필 사진
     UpdateProfile: async(req, res) => {
-        const userId = req.body.userId;
-        const username = req.body.username;
         let password = req.body.password;
         const nickname = req.body.nickname;
         const profileImage = req.file;
         const userIdx = req.decoded.userIdx;
-        const updateUserIdQuery = 'UPDATE user SET userId = ? WHERE user.userIdx = ?';
-        const updateUsernameQuery = 'UPDATE user SET username = ? WHERE user.userIdx = ?';
         const updatePasswordQuery = 'UPDATE user SET password = ?, salt = ? WHERE user.userIdx = ?';
         const updateNicknameQuery = 'UPDATE user SET nickname = ? WHERE user.userIdx = ?';
         const updateProfileImageQuery = 'UPDATE user SET profileImage = ? WHERE user.userIdx = ?';
+        const checkNickname = 'SELECT userIdx FROM user WHERE nickname = ?';
+        const checkNicknameResult = await db.queryParam_Arr(checkNickname, [nickname]);
+        if(!checkNicknameResult)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
+        else if(checkNicknameResult.length != 0)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.ALREADY_X('유저 닉네임')));
         const updateTransaction = await db.Transaction(async(connection) => {
-            if(userId)
-                await connection.query(updateUserIdQuery, [userId, userIdx]);
-            if(username)
-                await connection.query(updateUsernameQuery, [username, userIdx]);
             if(password)
             {
                 const salt = await crypto.randomBytes(32);
@@ -126,9 +124,9 @@ module.exports = {
                 await connection.query(updateProfileImageQuery, [profileImage.location, userIdx]);
         })
         if (!updateTransaction) {
-            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('게시물')));
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
             } else {
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('게시물')));
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('유저')));
         }
     }
 }
