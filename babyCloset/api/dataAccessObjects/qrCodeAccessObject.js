@@ -17,5 +17,10 @@ module.exports = {
         const authenticateQrcodeQuery = 'SELECT postIdx, isShared FROM post WHERE postIdx = ? AND userIdx = ?';
         const authenticateQrcodeResult = db.queryParam_Arr(authenticateQrcodeQuery, [postIdx, userIdx]);
         return authenticateQrcodeResult;
+    },
+    postSharingSuccess: async (receiverIdx, sharedDate, postIdx) => {
+        const postSharingSuccessQuery = 'INSERT INTO sharingSuccess (receiverIdx, sharedDate, postIdx) VALUES (?, ?, ?)';
+        const postSharingSuccessResult = db.queryParam_Arr(postSharingSuccessQuery, [receiverIdx, sharedDate, postIdx]);
+        return postSharingSuccessResult;
     }
-} 
+}

@@ -33,7 +33,7 @@ module.exports = {
             else if(authenticateQrcode.length == 0)
                 res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, "decode가 잘못되었습니다."));
             else
-            {
+            {  
                 
                 res.status(200).send(resForm.successTrue(statusCode.OK, "인증 성공"));
             }
