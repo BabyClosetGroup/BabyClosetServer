@@ -100,4 +100,3 @@ module.exports = {
         return confirmNewMessageResult;
     }
 }
-

@@ -2,6 +2,7 @@ const resForm = require('../../modules/utils/rest/responseForm');
 const statusCode = require('../../modules/utils/rest/statusCode');
 const resMessage = require('../../modules/utils/rest/responseMessage');
 const noteAccessObject = require('../dataAccessObjects/noteAccessObject');
+const db = require('../../modules/utils/db/pool');
 const moment = require('moment');
 
 module.exports = {
@@ -92,7 +93,18 @@ module.exports = {
                 else
                     counterpartIdx = getNotes[i].olderUserIdx;
                 const cnt = await noteAccessObject.GetUnreadNotesCount(counterpartIdx, userIdx);
-                getNotes[i].unreadCount = "+"+cnt[0].cnt;
+                const getUserNickname = 'SELECT nickname FROM user WHERE userIdx = ?';
+                const result = await db.queryParam_Arr(getUserNickname, [counterpartIdx]);
+                if(!result)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
+                else
+                {
+                    getNotes[i].userIdx = counterpartIdx;
+                    getNotes[i].nickname = result[0].nickname;
+                    getNotes[i].unreadCount = "+"+cnt[0].cnt;
+                    delete getNotes[i].olderUserIdx;
+                    delete getNotes[i].youngerUserIdx;
+                }
             }
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('쪽지'), {
                 getNotes
