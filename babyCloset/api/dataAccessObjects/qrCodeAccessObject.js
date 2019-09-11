@@ -20,7 +20,11 @@ module.exports = {
     },
     postSharingSuccess: async (receiverIdx, sharedDate, postIdx) => {
         const postSharingSuccessQuery = 'INSERT INTO sharingSuccess (receiverIdx, sharedDate, postIdx) VALUES (?, ?, ?)';
-        const postSharingSuccessResult = db.queryParam_Arr(postSharingSuccessQuery, [receiverIdx, sharedDate, postIdx]);
-        return postSharingSuccessResult;
+        const updatePostQuery = 'UPDATE post SET isShared = 1 WHERE postIdx = ?';
+        const postTransaction = await db.Transaction(async(connection) => {
+            await connection.query(postSharingSuccessQuery, [receiverIdx, sharedDate, postIdx]);
+            await connection.query(updatePostQuery, [postIdx]);
+        })
+        return postTransaction;
     }
 }

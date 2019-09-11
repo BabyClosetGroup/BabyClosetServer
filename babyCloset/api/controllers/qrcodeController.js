@@ -2,6 +2,7 @@ const resForm = require('../../modules/utils/rest/responseForm');
 const statusCode = require('../../modules/utils/rest/statusCode');
 const resMessage = require('../../modules/utils/rest/responseMessage');
 const qrcodeAccessObject = require('../dataAccessObjects/qrCodeAccessObject');
+const moment = require('moment');
 
 module.exports = {
     getQrcode: async(req ,res) => {
@@ -34,10 +35,14 @@ module.exports = {
                 res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, "decode가 잘못되었습니다."));
             else
             {  
-                
-                res.status(200).send(resForm.successTrue(statusCode.OK, "인증 성공"));
+                const receiverIdx = req.decoded.userIdx;
+                const sharedDate =  moment().format('YYYY-MM-DD');
+                const sharingSuccess = qrcodeAccessObject.postSharingSuccess(receiverIdx, sharedDate, postIdx)
+                if(!sharingSuccess)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, "인증 실패"));
+                else
+                    res.status(200).send(resForm.successTrue(statusCode.OK, "인증 성공"));
             }
         }
-
     }
 }
