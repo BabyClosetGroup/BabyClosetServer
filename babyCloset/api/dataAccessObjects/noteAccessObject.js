@@ -85,7 +85,7 @@ module.exports = {
     },
     GetNoteWithAllUsers : async(userIdx) => {
         const selectNotes = `SELECT olderUserIdx, youngerUserIdx, lastContent, createdTime FROM noteManagement
-        WHERE olderUserIdx = ? OR youngerUserIdx = ?`;
+        WHERE olderUserIdx = ? OR youngerUserIdx = ? ORDER BY createdTime DESC`;
         const selectNotesResult = await db.queryParam_Arr(selectNotes, [userIdx, userIdx]);
         return selectNotesResult;
     },

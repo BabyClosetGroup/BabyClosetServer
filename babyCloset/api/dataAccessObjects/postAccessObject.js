@@ -304,7 +304,6 @@ module.exports = {
                 await connection.query(updateAreaCategoryQuery, [areaCategory, postIdx]);
             if(clothCategory)
                 await connection.query(updateClothCategoryQuery, [clothCategory, postIdx]);
-            console.log(postImages);
             if(postImages.length != 0)
             {
                 await connection.query(deleteImagesQuery, [postIdx]);
