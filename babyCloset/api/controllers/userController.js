@@ -110,7 +110,7 @@ module.exports = {
         if(!checkNicknameResult)
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
         else if(checkNicknameResult.length != 0)
-            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.ALREADY_X('유저 닉네임')));
+            res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.ALREADY_X('유저 닉네임')));
         const updateTransaction = await db.Transaction(async(connection) => {
             if(password)
             {
@@ -126,7 +126,27 @@ module.exports = {
         if (!updateTransaction) {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
             } else {
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('유저')));
+            const selectUserProfileQuery = 'SELECT userIdx, userId, username, nickname, profileImage FROM user where userIdx = ?';
+            const resultUser = await db.queryParam_Arr(selectUserProfileQuery, [userIdx]);
+            if(!resultUser)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
+            else
+            {
+                const User = {
+                    userIdx: resultUser[0].userIdx,
+                    nickname: resultUser[0].nickname
+                }
+                const token = jwt.sign(User).accessToken
+                const responseData = {
+                    userIdx: resultUser[0].userIdx,
+                    userId: resultUser[0].userId,
+                    username: resultUser[0].username,
+                    nickname: resultUser[0].nickname,
+                    profileImage: resultUser[0].profileImage,
+                    token
+                }
+                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('유저'), responseData));
+            }
         }
     }
 }
