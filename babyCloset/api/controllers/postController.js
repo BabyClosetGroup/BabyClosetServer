@@ -79,13 +79,17 @@ module.exports = {
         }
     },
     GetAllPost: async(req, res) => {
+        const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
         const getAllPost = await postAccessObject.GetAllPost((parseInt(req.params.pagination)-1)*8);
-        if(!getAllPost)
+        if(!getAllPost || !confirmNewMessage)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
         else
         {
+            let newMessage = 0; 
+            if(confirmNewMessage.length != 0)
+                newMessage = 1;
             const filteredAllPost = getAllPost.map(post => {
                 if(post.postTitle.length > 12)
                     post.postTitle = post.postTitle.substring(0, 12) + "..";
@@ -93,18 +97,23 @@ module.exports = {
             })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
+                isNewMessage: newMessage,
                 allPost : filteredAllPost
             }));
         }
     },
     GetDeadlinePost: async(req, res) => {
+        const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
         const getDeadlinePost = await postAccessObject.GetDeadLinePostWithPagination((parseInt(req.params.pagination)-1)*8);
-        if(!getDeadlinePost)
+        if(!getDeadlinePost || !confirmNewMessage)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
         else
         {
+            let newMessage = 0; 
+            if(confirmNewMessage.length != 0)
+                newMessage = 1;
             const filteredDeadlinePost = getDeadlinePost.map(post => {
                 if(post.postTitle.length > 12)
                     post.postTitle = post.postTitle.substring(0, 12) + "..";
@@ -113,15 +122,17 @@ module.exports = {
             })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
+                isNewMessage: newMessage,
                 deadlinePost : filteredDeadlinePost
             }));
         }
     },
     GetPostDetail: async(req, res) => {
         const postIdx = req.params.postIdx;
+        const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
         const getDetailPost = await postAccessObject.GetDetailPost(postIdx);
         const getUserAndImages = await postAccessObject.GetUserAndImages(postIdx);
-        if(!getDetailPost || !getUserAndImages)
+        if(!getDetailPost || !getUserAndImages || !confirmNewMessage)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
@@ -131,6 +142,9 @@ module.exports = {
         }
         else
         {
+            let newMessage = 0; 
+            if(confirmNewMessage.length != 0)
+                newMessage = 1;
             const filteredDetailPost = getDetailPost.map(post => {
                 post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
                 return post
@@ -145,6 +159,7 @@ module.exports = {
             ResData.postImages = images;
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
+                isNewMessage: newMessage,
                 detailPost : ResData
             }));
         }
@@ -153,17 +168,21 @@ module.exports = {
         const area = req.body.area;
         const age = req.body.age;
         const cloth = req.body.cloth;
+        const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
         if(!area || !age || !cloth)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
         let getFilteredPost = await postAccessObject.GetFilteredAllPost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
-        if(!getFilteredPost)
+        if(!getFilteredPost || !confirmNewMessage)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
         else
         {
+            let newMessage = 0; 
+            if(confirmNewMessage.length != 0)
+                newMessage = 1;
             getFilteredPost = getFilteredPost.map(post => {
                 if(post.postTitle.length > 12)
                     post.postTitle = post.postTitle.substring(0, 12) + "..";
@@ -171,6 +190,7 @@ module.exports = {
             })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
+                isNewMessage: newMessage,
                 filteredAllPost : getFilteredPost
             }));
         }
@@ -179,17 +199,21 @@ module.exports = {
         const area = req.body.area;
         const age = req.body.age;
         const cloth = req.body.cloth;
+        const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
         if(!area || !age || !cloth)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
         let getFilteredPost = await postAccessObject.GetFilteredDeadlinePost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
-        if(!getFilteredPost)
+        if(!getFilteredPost || !confirmNewMessage)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
         else
         {
+            let newMessage = 0; 
+            if(confirmNewMessage.length != 0)
+                newMessage = 1;
             getFilteredPost = getFilteredPost.map(post => {
                 if(post.postTitle.length > 12)
                     post.postTitle = post.postTitle.substring(0, 12) + "..";
@@ -198,6 +222,7 @@ module.exports = {
             })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
+                isNewMessage: newMessage,
                 filteredDeadlinePost : getFilteredPost
             }));
         }
