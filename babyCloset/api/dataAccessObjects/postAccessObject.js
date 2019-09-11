@@ -109,7 +109,9 @@ module.exports = {
         FROM
         (SELECT post.postIdx, post.postTitle, post.createdTime, post.mainImage, postAreaCategory.areaCategoryIdx
         FROM postAreaCategory
-        JOIN post ON postAreaCategory.postIdx = post.postIdx)
+        JOIN post ON
+        post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day
+        AND postAreaCategory.postIdx = post.postIdx)
         AS postArea)
         AS postAreaImage
         On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
