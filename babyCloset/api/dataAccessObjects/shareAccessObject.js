@@ -22,7 +22,7 @@ module.exports = {
     },
     GetDetailUncompletedShare : async(postIdx) => {
         const selectPostQuery = 
-        `SELECT selectedPost.postIdx, selectedPost.postTitle, selectedPost.mainImage, area.areaName, selectedPost.registerNumber FROM
+        `SELECT selectedPost.postIdx, selectedPost.postTitle, selectedPost.mainImage, area.areaName, selectedPost.registerNumber AS applicantNumber FROM
         (SELECT postIdx, postTitle, mainImage, registerNumber FROM post WHERE postIdx = ? AND isShared = 0)  AS selectedPost,
         (SELECT postAreaCategory.postIdx, areaCategory.areaName
         FROM areaCategory, postAreaCategory WHERE areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx) AS area

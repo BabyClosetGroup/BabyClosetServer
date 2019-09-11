@@ -4,6 +4,19 @@ const resMessage = require('../../modules/utils/rest/responseMessage');
 const shareAccessObject = require('../dataAccessObjects/shareAccessObject');
 const moment = require('moment');
 
+const ratingFilter =  (rating) => {
+    const floor = (rating-Math.floor(rating));
+    if(0 <= floor && floor < 0.5)
+    {
+        floor-0.25 < 0 ? rating = rating-floor : rating = Math.floor(rating)+0.5;
+    }
+    else
+    {
+        floor-0.75 >= 0 ? rating = rating - floor + 1 : rating = Math.floor(rating)+0.5;
+    }
+    return rating;
+}
+
 module.exports = {
     PostShare : async(req, res) => {
         const userIdx = req.decoded.userIdx;
@@ -55,9 +68,17 @@ module.exports = {
         }
         else
         {
+            const filteredPostResult = getPostResult.map(e => {
+                e.applicantNumber = e.applicantNumber+"명";
+                return e;
+            })
+            const filteredApplicantResult = getApplicantResult.map(e => {
+                e.rating = ratingFilter(e.rating);
+                return e;
+            })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('신청자'), {
-                post: getPostResult[0],
-                applicants: getApplicantResult
+                post: filteredPostResult[0],
+                applicants: filteredApplicantResult
             }));
         }
     },
