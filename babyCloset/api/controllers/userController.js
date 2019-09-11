@@ -58,6 +58,8 @@ module.exports = {
     },
     SignIn: async(req, res) => {
         try{
+            if(!req.body.userId || !req.body.password)
+                res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
             const getUserWithSameIdQuery = 'SELECT userIdx, userId, username, salt, password, nickname, profileImage FROM user WHERE userId = ?';
             let resultUser = await db.queryParam_Arr(getUserWithSameIdQuery, [req.body.userId] );
             if(resultUser.length == 0)
