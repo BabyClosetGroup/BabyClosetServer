@@ -58,7 +58,7 @@ module.exports = {
     },
     SignIn: async(req, res) => {
         try{
-            const getUserWithSameIdQuery = 'SELECT userIdx, userId, username, salt, password, nickname FROM user WHERE userId = ?';
+            const getUserWithSameIdQuery = 'SELECT userIdx, userId, username, salt, password, nickname, profileImage FROM user WHERE userId = ?';
             let resultUser = await db.queryParam_Arr(getUserWithSameIdQuery, [req.body.userId] );
             if(resultUser.length == 0)
             {
@@ -79,6 +79,7 @@ module.exports = {
                         userId: resultUser[0].userId,
                         name: resultUser[0].username,
                         nickname: resultUser[0].nickname,
+                        profileImage: resultUser[0].profileImage,
                         token
                     }
                     res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.LOGIN_SUCCESS, responseData));
