@@ -7,6 +7,19 @@ const qrCodeAccessObject = require('../dataAccessObjects/qrCodeAccessObject');
 const moment = require('moment');
 const qrcodeGenerator = require('../../modules/utils/qrcodeGenerator');
 
+const ratingFilter =  (rating) => {
+    const floor = (rating-Math.floor(rating));
+    if(0 <= floor && floor < 0.5)
+    {
+        floor-0.25 < 0 ? rating = rating-floor : rating = Math.floor(rating)+0.5;
+    }
+    else
+    {
+        floor-0.75 >= 0 ? rating = rating - floor + 1 : rating = Math.floor(rating)+0.5;
+    }
+    return rating;
+}
+
 module.exports = {
     // 받아야 할 정보 나눔 나물 이미지(여러 개), 카테고리(자치구, 나이, 옷 종류), 마감기한, 제목, 내용 
     RegisterPost: async(req, res) => {
@@ -155,7 +168,7 @@ module.exports = {
             const ResData = filteredDetailPost[0];
             ResData.nickname = getUserAndImages[0].nickname;
             ResData.userIdx = getUserAndImages[0].userIdx;
-            console.log(getUserAndImages[0])
+            ResData.rating = ratingFilter(getUserAndImages[0].rating);
             ResData.postImages = images;
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {

@@ -192,7 +192,7 @@ module.exports = {
     },
     GetUserAndImages : async (postIdx) => {
         const selectUserAndImageQuery = `
-        SELECT user.nickname, user.userIdx, postImage.postImage
+        SELECT user.nickname, user.userIdx, user.rating, postImage.postImage
         FROM post, user, postImage where post.postIdx=${postIdx} and postImage.postIdx = post.postIdx and post.userIdx = user.userIdx`;
         const selectUserAndImageResult = await db.queryParam_None(selectUserAndImageQuery);
         return selectUserAndImageResult;
