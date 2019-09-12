@@ -75,18 +75,18 @@ module.exports = {
                 newMessage = 1;
             for(i=0; i<getDeadLinePost.length; i++)
             {
-                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
+                const selectAreaQueryWithDeadline = `SELECT areaName FROM postAreaCategory
                 AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
                 `
-                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery ,getDeadLinePost[i].postIdx);
-                if(!selectAreaResult)
+                const selectAreaResultWithDeadline = await db.queryParam_Arr(selectAreaQueryWithDeadline ,getDeadLinePost[i].postIdx);
+                if(!selectAreaResultWithDeadline)
                     res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
                 else
                 {
                     let areaArray = [];
-                    for(j=0; j<selectAreaResult.length ;j++)
+                    for(j=0; j<selectAreaResultWithDeadline.length ;j++)
                     {
-                        areaArray.push(selectAreaResult[j].areaName);
+                        areaArray.push(selectAreaResultWithDeadline[j].areaName);
                     }
                     getDeadLinePost[i].areaName = areaArray;
                 }
@@ -138,6 +138,24 @@ module.exports = {
         }
         else
         {
+            for(i=0; i<getAllPost.length; i++)
+            {
+                const selectAreaQueryWithAll = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResultWithAll = await db.queryParam_Arr(selectAreaQueryWithAll ,getAllPost[i].postIdx);
+                if(!selectAreaResultWithAll)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResultWithAll.length ;j++)
+                    {
+                        areaArray.push(selectAreaResultWithAll[j].areaName);
+                    }
+                    getAllPost[i].areaName = areaArray;
+                }
+            }
             let newMessage = 0; 
             if(confirmNewMessage.length != 0)
                 newMessage = 1;

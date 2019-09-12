@@ -110,21 +110,10 @@ module.exports = {
     },
     GetAllPost : async(offset) => {
         const selectAllPostQuery = `
-        SELECT
-        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.mainImage ,areaCategory.areaName
-        FROM areaCategory
-        JOIN
-        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postArea.mainImage, postArea.areaCategoryIdx
-        FROM 
-        (SELECT post.postIdx, post.postTitle, post.createdTime, post.mainImage, postAreaCategory.areaCategoryIdx
-        FROM postAreaCategory
-        JOIN post ON post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day
-        AND postAreaCategory.postIdx = post.postIdx)
-        AS postArea)
-        AS postAreaImage
-        On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
-        ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset};`;
-        const selectAllPostResult = await db.queryParam_None(selectAllPostQuery);
+        SELECT postIdx, postTitle, mainImage FROM post
+        WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
+        ORDER BY createdTime DESC LIMIT 8 OFFSET ?;`;
+        const selectAllPostResult = await db.queryParam_Arr(selectAllPostQuery, [offset]);
         return selectAllPostResult;
     },
     GetDeadLinePostWithPagination : async (offset) => {
