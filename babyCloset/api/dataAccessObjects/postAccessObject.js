@@ -94,19 +94,8 @@ module.exports = {
     },
     GetDeadLinePost : async () => {
         const selectDeadlinePostQuery = `
-        SELECT
-        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.deadline, postAreaImage.mainImage, areaCategory.areaName
-        FROM areaCategory
-        JOIN
-        (SELECT postArea.postIdx, postArea.postTitle, postArea.deadline, postArea.mainImage, postArea.areaCategoryIdx
-        FROM 
-        (SELECT post.postIdx, post.postTitle, post.deadline, post.mainImage, postAreaCategory.areaCategoryIdx
-        FROM postAreaCategory
-        JOIN post ON postAreaCategory.postIdx = post.postIdx
-        WHERE post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day)
-        AS postArea)
-        AS postAreaImage
-        ON postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
+        SELECT postIdx, postTitle, deadline, mainImage FROM post
+        WHERE deadline <= curdate() + interval 4 day AND deadline > curdate() - interval 1 day
         ORDER BY deadline LIMIT 3`;
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;

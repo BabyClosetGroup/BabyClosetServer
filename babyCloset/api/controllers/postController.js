@@ -6,6 +6,7 @@ const noteAccessObject = require('../dataAccessObjects/noteAccessObject');
 const qrCodeAccessObject = require('../dataAccessObjects/qrCodeAccessObject');
 const moment = require('moment');
 const qrcodeGenerator = require('../../modules/utils/qrcodeGenerator');
+const db = require('../../modules/utils/db/pool');
 
 const ratingFilter =  (rating) => {
     const floor = (rating-Math.floor(rating));
@@ -72,6 +73,24 @@ module.exports = {
             let newMessage = 0; 
             if(confirmNewMessage.length != 0)
                 newMessage = 1;
+            for(i=0; i<getDeadLinePost.length; i++)
+            {
+                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery ,getDeadLinePost[i].postIdx);
+                if(!selectAreaResult)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResult.length ;j++)
+                    {
+                        areaArray.push(selectAreaResult[j].areaName);
+                    }
+                    getDeadLinePost[i].areaName = areaArray;
+                }
+            }
             const filteredDeadlinePost = getDeadLinePost.map(post => {
                 if(post.postTitle.length > 8)
                     post.postTitle = post.postTitle.substring(0, 8) + "..";
@@ -80,7 +99,7 @@ module.exports = {
             })
             const filteredRecentPost = getRecentPost.map(post => {
                 if(post.postTitle.length > 11)
-                    post.postTitle = post.postTitle.substring(0, 11) + "..";
+                    post.postTitle = post.postTitle.substring(0, 11) + "..";    
                 return post
             })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
