@@ -97,6 +97,25 @@ module.exports = {
                 post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
                 return post
             })
+            for(i=0; i<getRecentPost.length; i++)
+            {
+                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResultWithRecent = await db.queryParam_Arr(selectAreaQuery ,getRecentPost[i].postIdx);
+                if(!selectAreaResultWithRecent)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArrayWithRecent = [];
+                    for(j=0; j<selectAreaResultWithRecent.length ;j++)
+                    {
+                        areaArrayWithRecent.push(selectAreaResultWithRecent[j].areaName);
+                    }
+                    getRecentPost[i].areaName = areaArrayWithRecent;
+                }
+            }
+
             const filteredRecentPost = getRecentPost.map(post => {
                 if(post.postTitle.length > 11)
                     post.postTitle = post.postTitle.substring(0, 11) + "..";    

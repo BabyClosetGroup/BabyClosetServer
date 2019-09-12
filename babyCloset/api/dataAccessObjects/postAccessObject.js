@@ -95,27 +95,15 @@ module.exports = {
     GetDeadLinePost : async () => {
         const selectDeadlinePostQuery = `
         SELECT postIdx, postTitle, deadline, mainImage FROM post
-        WHERE deadline <= curdate() + interval 4 day AND deadline > curdate() - interval 1 day
+        WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
         ORDER BY deadline LIMIT 3`;
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;
     },
     GetRecentPost : async () => {
         const selectRecentPostQuery = `
-        SELECT
-        postAreaImage.postIdx, postAreaImage.postTitle, postAreaImage.mainImage ,areaCategory.areaName
-        FROM areaCategory
-        JOIN
-        (SELECT postArea.postIdx, postArea.postTitle, postArea.createdTime, postArea.mainImage, postArea.areaCategoryIdx
-        FROM
-        (SELECT post.postIdx, post.postTitle, post.createdTime, post.mainImage, postAreaCategory.areaCategoryIdx
-        FROM postAreaCategory
-        JOIN post ON
-        post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day
-        AND postAreaCategory.postIdx = post.postIdx)
-        AS postArea) 
-        AS postAreaImage
-        On postAreaImage.areaCategoryIdx = areaCategory.areaCategoryIdx
+        SELECT postIdx, postTitle, deadline, mainImage FROM post
+        WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
         ORDER BY createdTime DESC LIMIT 4`;
         const selectRecentPostResult = await db.queryParam_None(selectRecentPostQuery);
         return selectRecentPostResult;
