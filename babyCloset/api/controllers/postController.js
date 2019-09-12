@@ -169,6 +169,10 @@ module.exports = {
             ResData.nickname = getUserAndImages[0].nickname;
             ResData.userIdx = getUserAndImages[0].userIdx;
             ResData.rating = ratingFilter(getUserAndImages[0].rating);
+            if(req.decoded.userIdx == getUserAndImages[0].userIdx)
+                ResData.isSender = 1;
+            else
+                ResData.isSender = 0;
             ResData.postImages = images;
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
