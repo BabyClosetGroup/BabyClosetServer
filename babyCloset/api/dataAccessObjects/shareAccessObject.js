@@ -39,8 +39,8 @@ module.exports = {
     },
     GetCompletedShare : async(userIdx) => {
         const selectPostQuery = `
-        SELECT b.postIdx, b.postTitle as postName, b.mainImage, b.areaName, b.receiverIdx, user.nickname AS receiverNickname, b.sharedDate, b.isRated FROM
-        (SELECT a.postIdx, a.postTitle, a.mainImage, a.areaName, sharingSuccess.receiverIdx, sharingSuccess.sharedDate, sharingSuccess.isRated  FROM 
+        SELECT b.postIdx, b.postTitle as postName, b.mainImage, b.areaName, b.receiverIdx, user.nickname AS receiverNickname, b.sharedDate, b.receiverIsRated FROM
+        (SELECT a.postIdx, a.postTitle, a.mainImage, a.areaName, sharingSuccess.receiverIdx, sharingSuccess.sharedDate, sharingSuccess.receiverIsRated  FROM 
         (SELECT selectedPost.postIdx, selectedPost.postTitle, selectedPost.mainImage, area.areaName, selectedPost.registerNumber FROM
         (SELECT postIdx, postTitle, mainImage, registerNumber FROM post WHERE isShared = 1 AND userIdx = ?) AS selectedPost,
         (SELECT postAreaCategory.postIdx, areaCategory.areaName
@@ -54,10 +54,10 @@ module.exports = {
     },
     GetReceivedShare : async(userIdx) => {
         const selectPostQuery = `
-        SELECT c.postIdx, c.postTitle as postName, c.mainImage, c.areaName, c.userIdx AS senderIdx, user.nickname AS senderNickname, c.sharedDate, c.isRated FROM
-        (SELECT b.postIdx, b.postTitle, b.mainImage, area.areaName, b.userIdx, b.sharedDate, b.isRated FROM 
-        (SELECT a.postIdx, post.postTitle, post.mainImage, post.userIdx, a.sharedDate, a.isRated FROM
-        (SELECT sharedDate, postIdx, isRated FROM BabyCloset.sharingSuccess where receiverIdx = ?) as a
+        SELECT c.postIdx, c.postTitle as postName, c.mainImage, c.areaName, c.userIdx AS senderIdx, user.nickname AS senderNickname, c.sharedDate, c.senderIsRated FROM
+        (SELECT b.postIdx, b.postTitle, b.mainImage, area.areaName, b.userIdx, b.sharedDate, b.senderIsRated FROM 
+        (SELECT a.postIdx, post.postTitle, post.mainImage, post.userIdx, a.sharedDate, a.senderIsRated FROM
+        (SELECT sharedDate, postIdx, senderIsRated FROM BabyCloset.sharingSuccess where receiverIdx = ?) as a
         JOIN post where post.postIdx = a.postIdx) as b
         JOIN
         (SELECT postAreaCategory.postIdx, areaCategory.areaName

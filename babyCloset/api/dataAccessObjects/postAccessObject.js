@@ -51,34 +51,46 @@ const makeClothWhereQuery = (arr) => {
 
 module.exports = {
     RegisterPost : async (postImages, postTitle, postContent, deadline, createdTime, userIdx, areaName, ageName, clothName)  => {
+        const areaArr = areaName.split(",").map(item => item.trim());
+        const ageArr = ageName.split(",").map(item => item.trim());
+        const clothArr = clothName.split(",").map(item => item.trim());
         const insertPostQuery = 'INSERT INTO post (postTitle, postContent, deadline, createdTime, userIdx)' +
-            ' VALUES (?, ?, ?, ?, ?)';
-            const insertPostImageQuery = 'INSERT INTO postImage (postImage, postIdx) VALUES (?, ?)';
-            const insertAreaCategoryQuery = 'INSERT INTO areaCategory (areaName) VALUES (?)';
-            const insertAgeCategoryQuery = 'INSERT INTO ageCategory (ageName) VALUES (?)';
-            const insertClothCategoryQuery = 'INSERT INTO clothCategory (clothName) VALUES (?)';
-            const insertPostAreaCategoryQuery = 'INSERT INTO postAreaCategory (postIdx, areaCategoryIdx) VALUES (?, ?)';
-            const insertPostAgeCategoryQuery = 'INSERT INTO postAgeCategory (postIdx, ageCategoryIdx) VALUES (?, ?)';
-            const insertPostClothCategoryQuery = 'INSERT INTO postClothCategory (postIdx, clothCategoryIdx) VALUES (?, ?)';
-            let postIdx;
-            const insertTransaction = await db.Transaction(async(connection) => {
-                const insertPostResult = await connection.query(insertPostQuery, [postTitle, postContent, deadline, createdTime, userIdx]);
-                postIdx = insertPostResult.insertId;
-                for(i=0; i<postImages.length ;i++)
-                    await connection.query(insertPostImageQuery, [postImages[i].location, postIdx]);
-                const updateMainImageQuery = `UPDATE post SET mainImage = "${postImages[0].location}" WHERE postIdx = ?`
-                await connection.query(updateMainImageQuery, [postIdx]);
-                const insertAreaCategoryResult = await connection.query(insertAreaCategoryQuery, [areaName]);
-                const insertAgeCategoryResult = await connection.query(insertAgeCategoryQuery, [ageName]);
-                const insertClothCategoryResult = await connection.query(insertClothCategoryQuery, [clothName]);
+        ' VALUES (?, ?, ?, ?, ?)';
+        const insertPostImageQuery = 'INSERT INTO postImage (postImage, postIdx) VALUES (?, ?)';
+        const insertAreaCategoryQuery = 'INSERT INTO areaCategory (areaName) VALUES (?)';
+        const insertAgeCategoryQuery = 'INSERT INTO ageCategory (ageName) VALUES (?)';
+        const insertClothCategoryQuery = 'INSERT INTO clothCategory (clothName) VALUES (?)';
+        const insertPostAreaCategoryQuery = 'INSERT INTO postAreaCategory (postIdx, areaCategoryIdx) VALUES (?, ?)';
+        const insertPostAgeCategoryQuery = 'INSERT INTO postAgeCategory (postIdx, ageCategoryIdx) VALUES (?, ?)';
+        const insertPostClothCategoryQuery = 'INSERT INTO postClothCategory (postIdx, clothCategoryIdx) VALUES (?, ?)';
+        let postIdx;
+        const insertTransaction = await db.Transaction(async(connection) => {
+            const insertPostResult = await connection.query(insertPostQuery, [postTitle, postContent, deadline, createdTime, userIdx]);
+            postIdx = insertPostResult.insertId;
+            for(i=0; i<postImages.length ;i++)
+                await connection.query(insertPostImageQuery, [postImages[i].location, postIdx]);
+            const updateMainImageQuery = `UPDATE post SET mainImage = "${postImages[0].location}" WHERE postIdx = ?`
+            await connection.query(updateMainImageQuery, [postIdx]);
+            for(i=0; i<areaArr.length; i++)
+            {
+                const insertAreaCategoryResult = await connection.query(insertAreaCategoryQuery, [areaArr[i]]);
                 const areaCategoryIdx = insertAreaCategoryResult.insertId;
-                const ageCategoryIdx = insertAgeCategoryResult.insertId;
-                const clothCategoryIdx = insertClothCategoryResult.insertId;
                 await connection.query(insertPostAreaCategoryQuery, [postIdx, areaCategoryIdx]);
+            }
+            for(i=0; i<ageArr.length; i++)
+            {
+                const insertAgeCategoryResult = await connection.query(insertAgeCategoryQuery, [ageArr[i]]);
+                const ageCategoryIdx = insertAgeCategoryResult.insertId;
                 await connection.query(insertPostAgeCategoryQuery, [postIdx, ageCategoryIdx]);
+            }
+            for(i=0; i<clothArr.length; i++)
+            {
+                const insertClothCategoryResult = await connection.query(insertClothCategoryQuery, [clothArr[i]]);
+                const clothCategoryIdx = insertClothCategoryResult.insertId;
                 await connection.query(insertPostClothCategoryQuery, [postIdx, clothCategoryIdx]);
-                });
-            return {result: insertTransaction, postIdx};
+            }
+            });
+        return {result: insertTransaction, postIdx};
     },
     GetDeadLinePost : async () => {
         const selectDeadlinePostQuery = `
