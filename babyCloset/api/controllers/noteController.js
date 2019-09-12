@@ -99,6 +99,7 @@ module.exports = {
                     res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
                 else
                 {
+                    getNotes[i].createdTime = moment(getNotes[i].createdTime).format('YYYY/MM/DD hh:mm');
                     getNotes[i].userIdx = counterpartIdx;
                     getNotes[i].nickname = result[0].nickname;
                     getNotes[i].unreadCount = "+"+cnt[0].cnt;
