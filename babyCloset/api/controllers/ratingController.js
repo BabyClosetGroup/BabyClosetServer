@@ -20,13 +20,14 @@ module.exports = {
     PostRating: async(req, res) => {
         const userIdx = req.body.userIdx;
         const rating = req.body.rating;
-        if(!userIdx || !rating)
+        const postIdx = req.body.postIdx;
+        if(!userIdx || !rating || !postIdx)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
         else
         {
-            const ratingTransaction = await ratingAccessObject.PostRating(userIdx, rating);
+            const ratingTransaction = await ratingAccessObject.PostRating(userIdx, rating, postIdx);
             if (!ratingTransaction)
             {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('별점')));

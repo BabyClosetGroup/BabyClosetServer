@@ -1,7 +1,7 @@
 const db = require('../../modules/utils/db/pool');
 
 module.exports = {
-    PostRating : async (userIdx, rating)  => {
+    PostRating : async (userIdx, rating, postIdx)  => {
         const updateRatingQuery = `UPDATE user SET rating = (rating * ratingCount + ?)/(ratingCount+1)
         WHERE userIdx = ?`
         const updateRatingCountQuery = 'UPDATE user SET ratingCount = ratingCount + 1 where userIdx = ?';

@@ -148,5 +148,14 @@ module.exports = {
                 res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('유저'), responseData));
             }
         }
+    },
+    getUser: async(req, res) => {
+        const userIdx = req.decoded.userIdx;
+        const getUserQuery = 'SELECT userIdx, userId, username, nickname, profileImage FROM user WHERE userIdx = ?';
+        const getUserResult = await db.queryParam_Arr(getUserQuery, [userIdx]);
+        if(!getUserResult)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('유저')));
+        else
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('유저'), getUserResult[0]));
     }
 }
