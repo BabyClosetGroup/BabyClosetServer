@@ -110,6 +110,24 @@ module.exports = {
         }
         else
         {
+            for(i=0; i<getCompletedResult.length; i++)
+            {
+                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, getCompletedResult[i].postIdx);
+                if(!selectAreaResult)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResult.length ;j++)
+                    {
+                        areaArray.push(selectAreaResult[j].areaName);
+                    }
+                    getCompletedResult[i].areaName = areaArray;
+                }
+            }
             const filteredPost = getCompletedResult.map(post => {
                 post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');
                 return post
@@ -128,6 +146,24 @@ module.exports = {
         }
         else
         {
+            for(i=0; i<getReceivedResult.length; i++)
+            {
+                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, getReceivedResult[i].postIdx);
+                if(!selectAreaResult)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResult.length ;j++)
+                    {
+                        areaArray.push(selectAreaResult[j].areaName);
+                    }
+                    getReceivedResult[i].areaName = areaArray;
+                }
+            }
             const filteredPost = getReceivedResult.map(post => {
                 post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');
                 return post
