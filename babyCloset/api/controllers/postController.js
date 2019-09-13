@@ -7,6 +7,7 @@ const qrCodeAccessObject = require('../dataAccessObjects/qrCodeAccessObject');
 const moment = require('moment');
 const qrcodeGenerator = require('../../modules/utils/qrcodeGenerator');
 const db = require('../../modules/utils/db/pool');
+require('events').EventEmitter.defaultMaxListeners = 25;
 
 const ratingFilter =  (rating) => {
     const floor = (rating-Math.floor(rating));
@@ -180,6 +181,24 @@ module.exports = {
         }
         else
         {
+            for(i=0; i<getDeadlinePost.length; i++)
+            {
+                const selectAreaQueryWithDeadline = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResultWithDeadline = await db.queryParam_Arr(selectAreaQueryWithDeadline ,getDeadlinePost[i].postIdx);
+                if(!selectAreaResultWithDeadline)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResultWithDeadline.length ;j++)
+                    {
+                        areaArray.push(selectAreaResultWithDeadline[j].areaName);
+                    }
+                    getDeadlinePost[i].areaName = areaArray;
+                }
+            }
             let newMessage = 0; 
             if(confirmNewMessage.length != 0)
                 newMessage = 1;
