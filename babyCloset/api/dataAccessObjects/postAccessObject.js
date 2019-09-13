@@ -261,8 +261,9 @@ module.exports = {
                 await connection.query(deleteAgeCategoryQuery, [postIdx]);
                 for(i=0; i<ageArr.length; i++)
                 {
-                    await connection.query(insertAgeCategoryQuery, [ageArr[i]]);
-                    await connection.query(insertPostAgeCategoryQuery, [postIdx, ageArr[i]]);
+                    const insertAgeCategoryResult = await connection.query(insertAgeCategoryQuery, [ageArr[i]]);
+                    const ageCategoryIdx = insertAgeCategoryResult.insertId;
+                    await connection.query(insertPostAgeCategoryQuery, [postIdx, ageCategoryIdx]);
                 }
             }
             if(areaCategory)
@@ -271,8 +272,9 @@ module.exports = {
                 await connection.query(deleteAreaCategoryQuery, [postIdx]);
                 for(i=0; i<areaArr.length; i++)
                 {
-                    await connection.query(insertAreaCategoryQuery, [areaArr[i]]);
-                    await connection.query(insertPostAreaCategoryQuery, [postIdx, areaArr[i]]);
+                    const insertAreaCategoryResult = await connection.query(insertAreaCategoryQuery, [areaArr[i]]);
+                    const areaCategoryIdx = insertAreaCategoryResult.insertId;
+                    await connection.query(insertPostAreaCategoryQuery, [postIdx, areaCategoryIdx]);
                 }
             }
             if(clothCategory)
@@ -281,8 +283,9 @@ module.exports = {
                 await connection.query(deleteClothCategoryQuery, [postIdx]);
                 for(i=0; i<clothArr.length; i++)
                 {
-                    await connection.query(insertClothCategoryQuery, [clothArr[i]]);
-                    await connection.query(insertPostClothCategoryQuery, [postIdx, clothArr[i]]);
+                    const insertClothCategoryResult = await connection.query(insertClothCategoryQuery, [clothArr[i]]);
+                    const clothCategoryIdx = insertClothCategoryResult.insertId;
+                    await connection.query(insertPostClothCategoryQuery, [postIdx, clothCategoryIdx]);
                 }
             }
             if(postImages.length != 0)
