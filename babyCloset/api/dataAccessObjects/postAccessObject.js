@@ -126,34 +126,8 @@ module.exports = {
     },
     GetDetailPost : async (postIdx) => {
         const selectDetailPostQuery = `
-        SELECT detail.postIdx, detail.postTitle, detail.postContent, detail.deadline, categories.areaName, categories.ageName, categories.clothName
-        FROM 
-        (SELECT postArea.postIdx, postArea.postTitle, postArea.postContent, postArea.deadline FROM
-        (SELECT post.postIdx, post.postTitle, post.postContent, post.deadline, postAreaCategory.areaCategoryIdx 
-        FROM postAreaCategory
-        JOIN post
-        ON postAreaCategory.postIdx = post.postIdx)
-        AS postArea
-        WHERE postArea.postIdx = ${postIdx} GROUP BY postArea.postIdx) AS detail
-        JOIN
-        (SELECT area.postIdx, area.areaName, age.ageName, cloth.clothName
-        FROM
-        (SELECT postAreaCategory.postIdx, areaCategory.areaCategoryIdx, areaCategory.areaName
-        FROM postAreaCategory
-        JOIN areaCategory ON postAreaCategory.areaCategoryIdx = areaCategory.areaCategoryIdx)
-        AS area,
-        (SELECT postAgeCategory.postIdx, ageCategory.ageCategoryIdx, ageCategory.ageName
-        FROM postAgeCategory
-        JOIN ageCategory ON postAgeCategory.ageCategoryIdx = ageCategory.ageCategoryIdx)
-        AS age,
-        (SELECT postClothCategory.postIdx, clothCategory.clothCategoryIdx, clothCategory.clothName
-        FROM postClothCategory
-        JOIN clothCategory ON postClothCategory.clothCategoryIdx = clothCategory.clothCategoryIdx) 
-        AS cloth
-        WHERE area.postIdx = ${postIdx} AND area.postIdx = age.postIdx and area.postIdx = cloth.postIdx)
-        AS categories
-        ON categories.postIdx = detail.postIdx`;
-        const selectDetailPostResult = await db.queryParam_None(selectDetailPostQuery);
+        SELECT postIdx, postTitle, postContent, deadline FROM post WHERE postIdx = ?`
+        const selectDetailPostResult = await db.queryParam_Arr(selectDetailPostQuery, [postIdx]);
         return selectDetailPostResult;
     },
     GetUserAndImages : async (postIdx) => {
@@ -177,8 +151,7 @@ module.exports = {
         JOIN post
         ON post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day
         AND postAreaCategory.postIdx = post.postIdx)
-        AS postArea
-        GROUP BY postArea.postIdx) AS detail
+        AS postArea) AS detail
         JOIN
         (SELECT area.postIdx, area.areaName, age.ageName, cloth.clothName
         FROM

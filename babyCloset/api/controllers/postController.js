@@ -230,6 +230,55 @@ module.exports = {
         }
         else
         {
+            const selectAreaQueryWithDetail = `SELECT areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResultWithDetail = await db.queryParam_Arr(selectAreaQueryWithDetail ,getDetailPost[0].postIdx);
+            if(!selectAreaResultWithDetail)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                let areaArray = [];
+                for(j=0; j<selectAreaResultWithDetail.length ;j++)
+                {
+                    areaArray.push(selectAreaResultWithDetail[j].areaName);
+                }
+                getDetailPost[0].areaName = areaArray;
+            }
+
+            const selectAgeQueryWithDetail = `SELECT ageName FROM postAgeCategory
+            AS pac JOIN ageCategory AS ac WHERE postIdx = ? AND pac.ageCategoryIdx = ac.ageCategoryIdx
+            `
+            const selectAgeResultWithDetail = await db.queryParam_Arr(selectAgeQueryWithDetail ,getDetailPost[0].postIdx);
+            if(!selectAgeResultWithDetail)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                let ageArray = [];
+                for(j=0; j<selectAgeResultWithDetail.length ;j++)
+                {
+                    ageArray.push(selectAgeResultWithDetail[j].ageName);
+                }
+                getDetailPost[0].ageName = ageArray;
+            }
+
+            const selectClothQueryWithDetail = `SELECT clothName FROM postClothCategory
+            AS pac JOIN clothCategory AS ac WHERE postIdx = ? AND pac.clothCategoryIdx = ac.clothCategoryIdx
+            `
+            const selectClothResultWithDetail = await db.queryParam_Arr(selectClothQueryWithDetail ,getDetailPost[0].postIdx);
+            if(!selectClothResultWithDetail)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                let clothArray = [];
+                for(j=0; j<selectClothResultWithDetail.length ;j++)
+                {
+                    clothArray.push(selectClothResultWithDetail[j].clothName);
+                }
+                getDetailPost[0].clothName = clothArray;
+            }
+
+
             let newMessage = 0; 
             if(confirmNewMessage.length != 0)
                 newMessage = 1;
