@@ -12,11 +12,7 @@ module.exports = {
     },
     GetUncompletedShare : async(userIdx) => {
         const selectPostQuery = 
-        `SELECT selectedPost.postIdx, selectedPost.postTitle, selectedPost.mainImage, area.areaName, selectedPost.registerNumber FROM
-        (SELECT postIdx, postTitle, mainImage, registerNumber FROM post WHERE isShared = 0 AND userIdx = ?) AS selectedPost,
-        (SELECT postAreaCategory.postIdx, areaCategory.areaName
-        FROM areaCategory, postAreaCategory WHERE areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx) AS area
-        WHERE selectedPost.postIdx = area.postIdx`;
+        "SELECT postIdx, postTitle, mainImage, registerNumber FROM post WHERE isShared = 0 AND userIdx = ?";
         const selectPostResult = db.queryParam_Arr(selectPostQuery, [userIdx]);
         return selectPostResult;
     },

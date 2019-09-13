@@ -3,6 +3,7 @@ const statusCode = require('../../modules/utils/rest/statusCode');
 const resMessage = require('../../modules/utils/rest/responseMessage');
 const shareAccessObject = require('../dataAccessObjects/shareAccessObject');
 const moment = require('moment');
+const db = require('../../modules/utils/db/pool');
 
 const ratingFilter =  (rating) => {
     const floor = (rating-Math.floor(rating));
@@ -48,6 +49,24 @@ module.exports = {
         }
         else
         {
+            for(i=0; i<getUncompletedResult.length; i++)
+            {
+                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, getUncompletedResult[i].postIdx);
+                if(!selectAreaResult)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResult.length ;j++)
+                    {
+                        areaArray.push(selectAreaResult[j].areaName);
+                    }
+                    getUncompletedResult[i].areaName = areaArray;
+                }
+            }
             const filteredPost = getUncompletedResult.map(post => {
                 post.registerNumber = post.registerNumber+'명';
                 return post
