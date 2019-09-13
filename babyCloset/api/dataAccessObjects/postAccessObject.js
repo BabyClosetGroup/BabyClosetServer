@@ -207,7 +207,7 @@ module.exports = {
         AS cloth
         WHERE area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
         AS categories
-        ON categories.postIdx = detail.postIdx ORDER BY deadline LIMIT 8 OFFSET ${offset}`;
+        ON categories.postIdx = detail.postIdx GROUP BY detail.postIdx ORDER BY deadline LIMIT 8 OFFSET ${offset}`;
         const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
         return selectFilteredPostResult;
     },
