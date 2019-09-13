@@ -149,7 +149,7 @@ module.exports = {
         (SELECT post.postIdx, post.postTitle, postAreaCategory.areaCategoryIdx, post.createdTime, post.mainImage
         FROM postAreaCategory
         JOIN post
-        ON post.deadline <= curdate() + interval 4 day AND post.deadline > curdate() - interval 1 day
+        ON post.deadline <= curdate() + interval 5 day AND post.deadline > curdate() - interval 1 day
         AND postAreaCategory.postIdx = post.postIdx)
         AS postArea) AS detail
         JOIN
@@ -169,7 +169,7 @@ module.exports = {
         AS cloth
         WHERE area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
         AS categories
-        ON categories.postIdx = detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset}`;
+        ON categories.postIdx = detail.postIdx GROUP BY detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset}`;
         const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
         return selectFilteredPostResult;
     },
