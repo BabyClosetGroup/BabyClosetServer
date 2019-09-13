@@ -445,6 +445,24 @@ module.exports = {
         }
         else
         {
+            for(i=0; i<selectPost.length; i++)
+            {
+                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, selectPost[i].postIdx);
+                if(!selectAreaResult)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResult.length ;j++)
+                    {
+                        areaArray.push(selectAreaResult[j].areaName);
+                    }
+                    selectPost[i].areaName = areaArray;
+                }
+            }
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
             {
                 allPost : selectPost
