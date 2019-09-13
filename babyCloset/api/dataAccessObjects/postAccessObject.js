@@ -212,15 +212,33 @@ module.exports = {
         return selectFilteredPostResult;
     },
     UpdatePost: async(title, content, deadline, areaCategory, ageCategory, clothCategory, postImages, postIdx) => {
-        const updateAgeCategoryQuery = `UPDATE ageCategory JOIN postAgeCategory
-        ON ageCategory.ageCategoryIdx = postAgeCategory.ageCategoryIdx
-        SET ageCategory.ageName = ? where postAgeCategory.postIdx = ?`;
-        const updateAreaCategoryQuery = `UPDATE areaCategory JOIN postAreaCategory
-        ON areaCategory.areaCategoryIdx = postAreaCategory.areaCategoryIdx
-        SET areaCategory.areaName = ? where postAreaCategory.postIdx = ?`;
-        const updateClothCategoryQuery = `UPDATE clothCategory JOIN postClothCategory
-        ON clothCategory.clothCategoryIdx = postClothCategory.clothCategoryIdx
-        SET clothCategory.clothName = ? where postClothCategory.postIdx = ?`;
+        const deleteAgeCategoryQuery = `
+        DELETE FROM ageCategory WHERE
+        ageCategory.ageCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT ageCategory.ageCategoryIdx FROM ageCategory, postAgeCategory
+        WHERE postAgeCategory.ageCategoryIdx = ageCategory.ageCategoryIdx
+        AND postAgeCategory.postIdx = ?) AS result);`;
+        const deleteAreaCategoryQuery = `
+        DELETE FROM areaCategory WHERE
+        areaCategory.areaCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT areaCategory.areaCategoryIdx FROM areaCategory, postAreaCategory
+        WHERE postAreaCategory.areaCategoryIdx = areaCategory.areaCategoryIdx
+        AND postAreaCategory.postIdx = ?) AS result);`;
+        const deleteClothCategoryQuery = `
+        DELETE FROM clothCategory WHERE
+        clothCategory.clothCategoryIdx IN 
+        (SELECT * FROM
+        (SELECT clothCategory.clothCategoryIdx FROM clothCategory, postClothCategory
+        WHERE postClothCategory.clothCategoryIdx = clothCategory.clothCategoryIdx
+        AND postClothCategory.postIdx = ?) AS result);`;
+        const insertAreaCategoryQuery = 'INSERT INTO areaCategory (areaName) VALUES (?)';
+        const insertAgeCategoryQuery = 'INSERT INTO ageCategory (ageName) VALUES (?)';
+        const insertClothCategoryQuery = 'INSERT INTO clothCategory (clothName) VALUES (?)';
+        const insertPostAreaCategoryQuery = 'INSERT INTO postAreaCategory (postIdx, areaCategoryIdx) VALUES (?, ?)';
+        const insertPostAgeCategoryQuery = 'INSERT INTO postAgeCategory (postIdx, ageCategoryIdx) VALUES (?, ?)';
+        const insertPostClothCategoryQuery = 'INSERT INTO postClothCategory (postIdx, clothCategoryIdx) VALUES (?, ?)';
         const updateTitleQuery = 'UPDATE post SET postTitle = ? WHERE post.postIdx = ?';
         const updateContentQuery = 'UPDATE post SET postContent = ? WHERE post.postIdx = ?';
         const updateDeadlineQuery = 'UPDATE post SET deadline = ? WHERE post.postIdx = ?';
@@ -238,11 +256,35 @@ module.exports = {
                 await connection.query(updateDeadlineQuery, [deadline, postIdx]);
             }
             if(ageCategory)
-                await connection.query(updateAgeCategoryQuery, [ageCategory, postIdx]);
+            {
+                const ageArr = ageCategory.split(",").map(item => item.trim());
+                await connection.query(deleteAgeCategoryQuery, [postIdx]);
+                for(i=0; i<ageArr.length; i++)
+                {
+                    await connection.query(insertAgeCategoryQuery, [ageArr[i]]);
+                    await connection.query(insertPostAgeCategoryQuery, [postIdx, ageArr[i]]);
+                }
+            }
             if(areaCategory)
-                await connection.query(updateAreaCategoryQuery, [areaCategory, postIdx]);
+            {
+                const areaArr = areaCategory.split(",").map(item => item.trim());
+                await connection.query(deleteAreaCategoryQuery, [postIdx]);
+                for(i=0; i<areaArr.length; i++)
+                {
+                    await connection.query(insertAreaCategoryQuery, [areaArr[i]]);
+                    await connection.query(insertPostAreaCategoryQuery, [postIdx, areaArr[i]]);
+                }
+            }
             if(clothCategory)
-                await connection.query(updateClothCategoryQuery, [clothCategory, postIdx]);
+            {
+                const clothArr = clothCategory.split(",").map(item => item.trim());
+                await connection.query(deleteClothCategoryQuery, [postIdx]);
+                for(i=0; i<clothArr.length; i++)
+                {
+                    await connection.query(insertClothCategoryQuery, [clothArr[i]]);
+                    await connection.query(insertPostClothCategoryQuery, [postIdx, clothArr[i]]);
+                }
+            }
             if(postImages.length != 0)
             {
                 await connection.query(deleteImagesQuery, [postIdx]);
