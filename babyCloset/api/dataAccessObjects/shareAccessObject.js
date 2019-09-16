@@ -28,7 +28,7 @@ module.exports = {
     },
     GetApplicantInformation : async(postIdx) => {
         const selectApplicantQuery = `
-        SELECT a.applicantIdx AS applicantIdx, b.nickname AS applicantNickname, b.rating FROM sharingWant
+        SELECT a.applicantIdx AS applicantIdx, b.nickname AS applicantNickname, b.rating, b.profileImage FROM sharingWant
         AS a JOIN  user AS b WHERE a.postIdx = ? AND a.applicantIdx = b.userIdx`
         const selectApplicantResult = db.queryParam_Arr(selectApplicantQuery, [postIdx]);
         return selectApplicantResult;
