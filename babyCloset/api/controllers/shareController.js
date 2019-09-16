@@ -87,6 +87,24 @@ module.exports = {
         }
         else
         {
+            for(i=0; i<getPostResult.length; i++)
+            {
+                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, getPostResult[i].postIdx);
+                if(!selectAreaResult)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('신청자')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResult.length ;j++)
+                    {
+                        areaArray.push(selectAreaResult[j].areaName);
+                    }
+                    getPostResult[i].areaName = areaArray;
+                }
+            }
             const filteredPostResult = getPostResult.map(e => {
                 e.applicantNumber = e.applicantNumber+"명";
                 return e;
