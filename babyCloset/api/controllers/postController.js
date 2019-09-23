@@ -56,7 +56,9 @@ module.exports = {
                 }
                 else
                 {
-                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('게시물')));
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('게시물'), {
+                        postIdx: insertTransaction.postIdx
+                    }));
                 }
             }
         }

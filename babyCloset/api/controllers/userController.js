@@ -107,6 +107,7 @@ module.exports = {
         const updateProfileImageQuery = 'UPDATE user SET profileImage = ? WHERE user.userIdx = ?';
         const checkNickname = 'SELECT userIdx FROM user WHERE nickname = ?';
         const checkNicknameResult = await db.queryParam_Arr(checkNickname, [nickname]);
+        console.log(profileImage)
         if(!checkNicknameResult)
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
         else if(checkNicknameResult.length != 0)
@@ -121,11 +122,16 @@ module.exports = {
             if(nickname)
                 await connection.query(updateNicknameQuery, [nickname, userIdx]);
             if(profileImage)
+            {
+                console.log("들어왔니?")
                 await connection.query(updateProfileImageQuery, [profileImage.location, userIdx]);
+
+            }
         })
+        console.log(updateTransaction)
         if (!updateTransaction) {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
-            } else {
+            } else {    
             const selectUserProfileQuery = 'SELECT userIdx, userId, username, nickname, profileImage FROM user where userIdx = ?';
             const resultUser = await db.queryParam_Arr(selectUserProfileQuery, [userIdx]);
             if(!resultUser)

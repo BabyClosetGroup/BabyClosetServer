@@ -59,6 +59,10 @@ module.exports = {
             if (!getNotes || !updateReadBit || !getCounterpartNickname) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
             }
+            else if(getNotes.length == 0)
+            {
+                res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NO_X('유저')));
+            }
             else {
                 const filteredNotes = getNotes.map(note => {
                     note.createdTime = moment(note.createdTime).format('YY/MM/DD HH:mm');
@@ -84,6 +88,7 @@ module.exports = {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
         else
         {
+            console.log(userIdx)
             console.log('xx', getNotes)
             for(i=0; i<getNotes.length ;i++)
             {
@@ -92,6 +97,7 @@ module.exports = {
                     counterpartIdx = getNotes[i].youngerUserIdx;
                 else
                     counterpartIdx = getNotes[i].olderUserIdx;
+                console.log('??',counterpartIdx);
                 const cnt = await noteAccessObject.GetUnreadNotesCount(counterpartIdx, userIdx);
                 const getUserNickname = 'SELECT nickname FROM user WHERE userIdx = ?';
                 const result = await db.queryParam_Arr(getUserNickname, [counterpartIdx]);

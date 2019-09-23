@@ -11,9 +11,15 @@ module.exports = {
             await connection.query(updateRatingQuery, [rating, userIdx]);
             await connection.query(updateRatingCountQuery, [userIdx]);
             if(isSender)
+            {
+                console.log('111')
                 await connection.query(updateSenderIsRatedQuery, [postIdx]);
+            }
             else
+            {
+                console.log('222')
                 await connection.query(updateReceiverIsRatedQuery, [postIdx]);
+            }
         });
         return updateTransaction;
     },

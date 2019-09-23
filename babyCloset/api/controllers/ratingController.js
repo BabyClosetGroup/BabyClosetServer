@@ -34,6 +34,7 @@ module.exports = {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('별점')));
             else
             {   
+                console.log(checkSenderResult)
                 let isSender = false;
                 if(checkSenderResult.length == 1)
                 {

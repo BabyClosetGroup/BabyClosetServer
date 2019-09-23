@@ -148,6 +148,7 @@ module.exports = {
             }
             const filteredPost = getCompletedResult.map(post => {
                 post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');
+                post.rating = ratingFilter(post.rating);
                 return post
             })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'), {
@@ -184,6 +185,7 @@ module.exports = {
             }
             const filteredPost = getReceivedResult.map(post => {
                 post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');
+                post.rating = ratingFilter(post.rating);
                 return post
             })
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'), {

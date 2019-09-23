@@ -2,6 +2,7 @@ const db = require('../../modules/utils/db/pool');
 const moment = require('moment');
 
 const makeAreaWhereQuery = (arr) => {
+    console.log(arr[0]);
     for(i=0; i<arr.length; i++)
     {
         if (arr[i] == "서울 전체")
@@ -18,6 +19,7 @@ const makeAreaWhereQuery = (arr) => {
 }
 
 const makeAgeWhereQuery = (arr) => {
+    console.log(arr[0]);
     for(i=0; i<arr.length; i++)
     {
         if (arr[i] == "나이 전체")
@@ -34,6 +36,7 @@ const makeAgeWhereQuery = (arr) => {
 }
 
 const makeClothWhereQuery = (arr) => {
+    console.log(arr[0]);
     for(i=0; i<arr.length; i++)
     {
         if (arr[i] == "카테고리 전체")
