@@ -337,5 +337,14 @@ module.exports = {
         `SELECT postIdx, postTitle, mainImage FROM post WHERE isShared = 0 AND userIdx = ?`;
         const selectPostResult = await db.queryParam_Arr(selectPostQuery, [userIdx]);
         return selectPostResult;
+    },
+    GetSearchedPost : async(query, offset) => {
+        console.log(query)
+        const selectAllPostQuery = `
+        SELECT postIdx, postTitle, deadline, mainImage FROM post
+        WHERE postTitle LIKE '%${query}%' AND deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
+        ORDER BY deadline ASC, postIdx DESC LIMIT 8 OFFSET ?;`
+        const selectAllPostResult = await db.queryParam_Arr(selectAllPostQuery, [offset]);
+        return selectAllPostResult;
     }
 }

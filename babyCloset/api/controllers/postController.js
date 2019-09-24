@@ -472,5 +472,50 @@ module.exports = {
                 allPost : selectPost
             }));
         }
+    },
+    SearchPost: async(req, res) => {
+        const query = req.body.query;
+        console.log(query)
+        const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
+        const getSearchPost = await postAccessObject.GetSearchedPost(query, (parseInt(req.params.pagination)-1)*8);
+        if(!getSearchPost || !confirmNewMessage)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+        }
+        else
+        {
+            for(i=0; i<getSearchPost.length; i++)
+            {
+                const selectAreaQueryWithDeadline = `SELECT areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResultWithDeadline = await db.queryParam_Arr(selectAreaQueryWithDeadline ,getSearchPost[i].postIdx);
+                if(!selectAreaResultWithDeadline)
+                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    let areaArray = [];
+                    for(j=0; j<selectAreaResultWithDeadline.length ;j++)
+                    {
+                        areaArray.push(selectAreaResultWithDeadline[j].areaName);
+                    }
+                    getSearchPost[i].areaName = areaArray;
+                }
+            }
+            let newMessage = 0; 
+            if(confirmNewMessage.length != 0)
+                newMessage = 1;
+            const filteredDeadlinePost = getSearchPost.map(post => {
+                if(post.postTitle.length > 12)
+                    post.postTitle = post.postTitle.substring(0, 12) + "..";
+                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
+                return post
+            })
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+            {
+                isNewMessage: newMessage,
+                allPost : filteredDeadlinePost
+            }));
+        }
     }
 }  
