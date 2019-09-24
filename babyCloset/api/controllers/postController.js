@@ -134,6 +134,7 @@ module.exports = {
     },
     GetAllPost: async(req, res) => {
         const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
+        console.log((parseInt(req.params.pagination)-1)*8)
         const getAllPost = await postAccessObject.GetAllPost((parseInt(req.params.pagination)-1)*8);
         if(!getAllPost || !confirmNewMessage)
         {
@@ -294,6 +295,7 @@ module.exports = {
             const ResData = filteredDetailPost[0];
             ResData.nickname = getUserAndImages[0].nickname;
             ResData.userIdx = getUserAndImages[0].userIdx;
+            ResData.profileImage =  getUserAndImages[0].profileImage;
             ResData.rating = ratingFilter(getUserAndImages[0].rating);
             if(req.decoded.userIdx == getUserAndImages[0].userIdx)
                 ResData.isSender = 1;

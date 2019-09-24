@@ -99,7 +99,7 @@ module.exports = {
         const selectDeadlinePostQuery = `
         SELECT postIdx, postTitle, deadline, mainImage FROM post
         WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
-        ORDER BY deadline LIMIT 3`;
+        ORDER BY deadline, postIdx DESC LIMIT 3`;
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
         return selectDeadlinePostResult;
     },
@@ -107,7 +107,7 @@ module.exports = {
         const selectRecentPostQuery = `
         SELECT postIdx, postTitle, deadline, mainImage FROM post
         WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
-        ORDER BY createdTime DESC LIMIT 4`;
+        ORDER BY createdTime DESC, postIdx DESC LIMIT 4`;
         const selectRecentPostResult = await db.queryParam_None(selectRecentPostQuery);
         return selectRecentPostResult;
     },
@@ -115,7 +115,7 @@ module.exports = {
         const selectAllPostQuery = `
         SELECT postIdx, postTitle, mainImage FROM post
         WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
-        ORDER BY createdTime DESC LIMIT 8 OFFSET ?;`;
+        ORDER BY createdTime DESC, postIdx DESC LIMIT 8 OFFSET ?;`;
         const selectAllPostResult = await db.queryParam_Arr(selectAllPostQuery, [offset]);
         return selectAllPostResult;
     },
@@ -123,7 +123,7 @@ module.exports = {
         const selectDeadlinePostQuery = `
         SELECT postIdx, postTitle, deadline, mainImage FROM post
         WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
-        ORDER BY deadline LIMIT 8 OFFSET ?`;
+        ORDER BY deadline ASC, postIdx DESC LIMIT 8 OFFSET ?`;
         const selectDeadlinePostResult = await db.queryParam_Arr(selectDeadlinePostQuery, [offset]);
         return selectDeadlinePostResult;
     },
@@ -135,7 +135,7 @@ module.exports = {
     },
     GetUserAndImages : async (postIdx) => {
         const selectUserAndImageQuery = `
-        SELECT user.nickname, user.userIdx, user.rating, postImage.postImage
+        SELECT user.nickname, user.userIdx, user.rating, user.profileImage, postImage.postImage
         FROM post, user, postImage where post.postIdx=${postIdx} and postImage.postIdx = post.postIdx and post.userIdx = user.userIdx`;
         const selectUserAndImageResult = await db.queryParam_None(selectUserAndImageQuery);
         return selectUserAndImageResult;
@@ -172,7 +172,7 @@ module.exports = {
         AS cloth
         WHERE area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
         AS categories
-        ON categories.postIdx = detail.postIdx GROUP BY detail.postIdx ORDER BY createdTime DESC LIMIT 8 OFFSET ${offset}`;
+        ON categories.postIdx = detail.postIdx GROUP BY detail.postIdx ORDER BY createdTime DESC, postIdx DESC LIMIT 8 OFFSET ${offset}`;
         const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
         return selectFilteredPostResult;
     },
@@ -210,7 +210,7 @@ module.exports = {
         AS cloth
         WHERE area.postIdx = age.postIdx AND area.postIdx = cloth.postIdx)
         AS categories
-        ON categories.postIdx = detail.postIdx GROUP BY detail.postIdx ORDER BY deadline LIMIT 8 OFFSET ${offset}`;
+        ON categories.postIdx = detail.postIdx GROUP BY detail.postIdx ORDER BY deadline, postIdx DESC LIMIT 8 OFFSET ${offset}`;
         const selectFilteredPostResult = await db.queryParam_None(selectFilteredPostQuery);
         return selectFilteredPostResult;
     },

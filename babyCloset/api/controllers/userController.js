@@ -10,6 +10,7 @@ const jwt = require('../../modules/utils/security/jwt');
 module.exports = {
     SignUp: async(req, res) => {
         let duplicate = false;
+
         if(!req.body.userId || !req.body.name || !req.body.password || !req.body.nickname)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
