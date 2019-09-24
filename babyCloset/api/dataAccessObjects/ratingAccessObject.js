@@ -5,20 +5,18 @@ module.exports = {
         const updateRatingQuery = `UPDATE user SET rating = (rating * ratingCount + ?)/(ratingCount+1)
         WHERE userIdx = ?`
         const updateRatingCountQuery = 'UPDATE user SET ratingCount = ratingCount + 1 where userIdx = ?';
-        const updateSenderIsRatedQuery = 'UPDATE sharingSuccess SET senderIsRated = 1 where postIdx = ?';
-        const updateReceiverIsRatedQuery = 'UPDATE sharingSuccess SET receiverIsRated = 1 where postIdx = ?';
+        const updateSenderIsRatedQuery = 'UPDATE sharingSuccess SET senderIsRated = 1, senderRating = ? where postIdx = ?';
+        const updateReceiverIsRatedQuery = 'UPDATE sharingSuccess SET receiverIsRated = 1, receiverRating = ? where postIdx = ?';
         const updateTransaction = await db.Transaction(async(connection) => {
             await connection.query(updateRatingQuery, [rating, userIdx]);
             await connection.query(updateRatingCountQuery, [userIdx]);
             if(isSender)
             {
-                console.log('111')
-                await connection.query(updateSenderIsRatedQuery, [postIdx]);
+                await connection.query(updateSenderIsRatedQuery, [rating, postIdx]);
             }
             else
             {
-                console.log('222')
-                await connection.query(updateReceiverIsRatedQuery, [postIdx]);
+                await connection.query(updateReceiverIsRatedQuery, [rating, postIdx]);
             }
         });
         return updateTransaction;

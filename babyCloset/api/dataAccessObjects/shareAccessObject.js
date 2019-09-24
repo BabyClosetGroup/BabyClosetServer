@@ -31,8 +31,8 @@ module.exports = {
     },
     GetCompletedShare : async(userIdx) => {
         const selectPostQuery = `
-        SELECT b.postIdx, b.postTitle as postName, b.mainImage, b.receiverIdx, user.nickname AS receiverNickname, b.sharedDate, b.receiverIsRated, user.rating FROM
-        (SELECT a.postIdx, a.postTitle, a.mainImage, sharingSuccess.receiverIdx, sharingSuccess.sharedDate, sharingSuccess.receiverIsRated  FROM 
+        SELECT b.postIdx, b.postTitle as postName, b.mainImage, b.receiverIdx, user.nickname AS receiverNickname, b.sharedDate, b.receiverIsRated, b.receiverRating FROM
+        (SELECT a.postIdx, a.postTitle, a.mainImage, sharingSuccess.receiverIdx, sharingSuccess.sharedDate, sharingSuccess.receiverIsRated, sharingSuccess.receiverRating  FROM 
         (SELECT postIdx, postTitle, mainImage, registerNumber FROM post WHERE isShared = 1 AND userIdx = ?) AS a
         JOIN
         sharingSuccess where a.postIdx = sharingSuccess.postIdx) AS b
@@ -42,10 +42,10 @@ module.exports = {
     },
     GetReceivedShare : async(userIdx) => {
         const selectPostQuery = `
-        SELECT c.postIdx, c.postTitle as postName, c.mainImage, c.userIdx AS senderIdx, user.nickname AS senderNickname, c.sharedDate, c.senderIsRated, user.rating
+        SELECT c.postIdx, c.postTitle as postName, c.mainImage, c.userIdx AS senderIdx, user.nickname AS senderNickname, c.sharedDate, c.senderIsRated, c.senderRating
         FROM
-        (SELECT a.postIdx, post.postTitle, post.mainImage, post.userIdx, a.sharedDate, a.senderIsRated FROM
-        (SELECT sharedDate, postIdx, senderIsRated FROM BabyCloset.sharingSuccess where receiverIdx = ?) as a
+        (SELECT a.postIdx, post.postTitle, post.mainImage, post.userIdx, a.sharedDate, a.senderIsRated, a.senderRating FROM
+        (SELECT sharedDate, postIdx, senderIsRated, senderRating FROM BabyCloset.sharingSuccess where receiverIdx = ?) as a
         JOIN post where post.postIdx = a.postIdx) as c
         JOIN user
         WHERE user.userIdx = c.userIdx`;
