@@ -67,9 +67,9 @@ module.exports = {
                 const filteredNotes = getNotes.map(note => {
                     note.createdTime = moment(note.createdTime).format('YY/MM/DD HH:mm');
                     if(note.senderIdx == loggedInUser)
-                        note.noteType = "받은 쪽지"
+                        note.noteType = 1
                     else
-                        note.noteType = "보낸 쪽지"
+                        note.noteType = 0
                     delete note.senderIdx;
                     delete note.nickname;
                     return note;
