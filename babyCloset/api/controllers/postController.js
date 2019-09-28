@@ -110,6 +110,7 @@ module.exports = {
                     res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
                 else
                 {
+                    console.log(selectAreaResultWithRecent)
                     let areaArrayWithRecent = [];
                     for(j=0; j<selectAreaResultWithRecent.length ;j++)
                     {

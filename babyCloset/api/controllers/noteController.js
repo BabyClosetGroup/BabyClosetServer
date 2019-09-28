@@ -59,7 +59,7 @@ module.exports = {
             if (!getNotes || !updateReadBit || !getCounterpartNickname) {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('쪽지')));
             }
-            else if(getNotes.length == 0)
+            else if(getCounterpartNickname.length == 0)
             {
                 res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NO_X('유저')));
             }

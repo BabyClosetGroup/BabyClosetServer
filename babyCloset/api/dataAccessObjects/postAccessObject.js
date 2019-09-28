@@ -2,7 +2,6 @@ const db = require('../../modules/utils/db/pool');
 const moment = require('moment');
 
 const makeAreaWhereQuery = (arr) => {
-    console.log(arr[0]);
     for(i=0; i<arr.length; i++)
     {
         if (arr[i] == "서울 전체")
@@ -339,7 +338,6 @@ module.exports = {
         return selectPostResult;
     },
     GetSearchedPost : async(query, offset) => {
-        console.log(query)
         const selectAllPostQuery = `
         SELECT postIdx, postTitle, deadline, mainImage FROM post
         WHERE postTitle LIKE '%${query}%' AND deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day

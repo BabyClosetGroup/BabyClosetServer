@@ -69,7 +69,7 @@ module.exports = {
         WHERE (senderIdx = ? and receiverIdx= ?) OR (senderIdx = ? and receiverIdx = ?)
         )
         AS filteredNote 
-        WHERE user.userIdx = filteredNote.receiverIdx ORDER BY filteredNote.createdTime ASC`;
+        WHERE user.userIdx = filteredNote.receiverIdx ORDER BY filteredNote.noteIdx ASC`;
         const getNotes = await db.queryParam_Arr(getNotesQuery, [loggedInUser, counterpart, counterpart, loggedInUser]);
         return getNotes;
     },
