@@ -124,9 +124,7 @@ module.exports = {
                 await connection.query(updateNicknameQuery, [nickname, userIdx]);
             if(profileImage)
             {
-                console.log("들어왔니?")
                 await connection.query(updateProfileImageQuery, [profileImage.location, userIdx]);
-
             }
         })
         console.log(updateTransaction)

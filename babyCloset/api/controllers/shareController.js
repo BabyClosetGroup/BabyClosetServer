@@ -5,6 +5,40 @@ const shareAccessObject = require('../dataAccessObjects/shareAccessObject');
 const moment = require('moment');
 const db = require('../../modules/utils/db/pool');
 
+const matchAreaWithPost = (selectAreaResult, getPost) => {
+    var num = 0;
+    let arr = [];
+    do
+    {
+        let tmpArr = [];
+        tmpArr.push(selectAreaResult[num]);
+        while(num<selectAreaResult.length-1 &&
+            selectAreaResult[num].postIdx == selectAreaResult[num+1].postIdx)
+        {
+            tmpArr.push(selectAreaResult[num+1]);
+            num++;
+        }
+        arr.push(tmpArr);
+        num++;
+    } while(num<selectAreaResult.length);
+    for(k=0; k<getPost.length ;k++)
+    {
+        for(i=0; i<arr.length;i++)
+        {
+            if(getPost[k].postIdx == arr[i][0].postIdx)
+            {
+                let areaArray = [];
+                for(j=0; j<arr[i].length ;j++)
+                {
+                    areaArray.push(arr[i][j].areaName);
+                }
+                getPost[k].areaName = areaArray;
+                break;
+            }
+        }
+    }
+}
+
 const ratingFilter =  (rating) => {
     const floor = (rating-Math.floor(rating));
     if(0 <= floor && floor < 0.5)
@@ -128,23 +162,25 @@ module.exports = {
         }
         else
         {
+            let allStr = "";
             for(i=0; i<getCompletedResult.length; i++)
             {
-                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
-                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
-                `
-                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, getCompletedResult[i].postIdx);
-                if(!selectAreaResult)
-                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-                else
-                {
-                    let areaArray = [];
-                    for(j=0; j<selectAreaResult.length ;j++)
-                    {
-                        areaArray.push(selectAreaResult[j].areaName);
-                    }
-                    getCompletedResult[i].areaName = areaArray;
-                }
+                allStr = allStr + `postIdx = ${getCompletedResult[i].postIdx} OR `;
+            }
+            allStr = allStr.substring(0, allStr.length-4);
+            if(allStr.length == 0)
+            {
+                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
+            const selectAreaQuery = `SELECT postIdx, areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResult = await db.queryParam_None(selectAreaQuery);
+            if(!selectAreaResult)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                matchAreaWithPost(selectAreaResult, getCompletedResult);
             }
             const filteredPost = getCompletedResult.map(post => {
                 post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');
@@ -165,23 +201,26 @@ module.exports = {
         }
         else
         {
+            let allStr = "";
             for(i=0; i<getReceivedResult.length; i++)
             {
-                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
-                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
-                `
-                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, getReceivedResult[i].postIdx);
-                if(!selectAreaResult)
-                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-                else
-                {
-                    let areaArray = [];
-                    for(j=0; j<selectAreaResult.length ;j++)
-                    {
-                        areaArray.push(selectAreaResult[j].areaName);
-                    }
-                    getReceivedResult[i].areaName = areaArray;
-                }
+                allStr = allStr + `postIdx = ${getReceivedResult[i].postIdx} OR `;
+            }
+            allStr = allStr.substring(0, allStr.length-4);
+            if(allStr.length == 0)
+            {
+                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
+            const selectAreaQuery = `SELECT postIdx, areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResult = await db.queryParam_None(selectAreaQuery);
+            console.log(selectAreaQuery);
+            if(!selectAreaResult)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                matchAreaWithPost(selectAreaResult, getReceivedResult);
             }
             const filteredPost = getReceivedResult.map(post => {
                 post.sharedDate = moment(post.sharedDate).format('YYYY. MM. DD');

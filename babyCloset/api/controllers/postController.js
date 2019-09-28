@@ -117,6 +117,10 @@ module.exports = {
                 deadLineStr = deadLineStr + `postIdx = ${getDeadLinePost[i].postIdx} OR `;
             }
             deadLineStr = deadLineStr.substring(0, deadLineStr.length-4);
+            if(deadLineStr.length == 0)
+            {
+                deadLineStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
             const selectAreaQueryWithDeadline = `SELECT postIdx, areaName FROM postAreaCategory
             AS pac JOIN areaCategory AS ac WHERE (`+ deadLineStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
@@ -140,6 +144,10 @@ module.exports = {
                 recentStr = recentStr + `postIdx = ${getRecentPost[i].postIdx} OR `;
             }
             recentStr = recentStr.substring(0, recentStr.length-4);
+            if(recentStr.length == 0)
+            {
+                recentStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
             const selectAreaQuery = `SELECT postIdx, areaName FROM postAreaCategory
             AS pac JOIN areaCategory AS ac WHERE (`+ recentStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
@@ -182,6 +190,10 @@ module.exports = {
                 allStr = allStr + `postIdx = ${getAllPost[i].postIdx} OR `;
             }
             allStr = allStr.substring(0, allStr.length-4);
+            if(allStr.length == 0)
+            {
+                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
             const selectAreaQueryWithAll = `SELECT postIdx, areaName FROM postAreaCategory
             AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
@@ -219,6 +231,10 @@ module.exports = {
                 deadLineStr = deadLineStr + `postIdx = ${getDeadlinePost[i].postIdx} OR `;
             }
             deadLineStr = deadLineStr.substring(0, deadLineStr.length-4);
+            if(deadLineStr.length == 0)
+            {
+                deadLineStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
             const selectAreaQueryWithDeadline = `SELECT postIdx, areaName FROM postAreaCategory
             AS pac JOIN areaCategory AS ac WHERE (`+ deadLineStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
@@ -358,6 +374,10 @@ module.exports = {
                 allStr = allStr + `postIdx = ${getFilteredPost[i].postIdx} OR `;
             }
             allStr = allStr.substring(0, allStr.length-4);
+            if(allStr.length == 0)
+            {
+                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
             const selectAreaQueryWithFilter = `SELECT postIdx, areaName FROM postAreaCategory
             AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
@@ -405,6 +425,10 @@ module.exports = {
                 deadLineStr = deadLineStr + `postIdx = ${getFilteredPost[i].postIdx} OR `;
             }
             deadLineStr = deadLineStr.substring(0, deadLineStr.length-4);
+            if(deadLineStr.length == 0)
+            {
+                deadLineStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
             const selectAreaQueryWithFilter = `SELECT postIdx, areaName FROM postAreaCategory
             AS pac JOIN areaCategory AS ac WHERE (`+ deadLineStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
@@ -478,6 +502,10 @@ module.exports = {
                 allStr = allStr + `postIdx = ${selectPost[i].postIdx} OR `;
             }
             allStr = allStr.substring(0, allStr.length-4);
+            if(allStr.length == 0)
+            {
+                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
             const selectAreaQuery = `SELECT postIdx, areaName FROM postAreaCategory
             AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
@@ -511,6 +539,10 @@ module.exports = {
                 allStr = allStr + `postIdx = ${getSearchPost[i].postIdx} OR `;
             }
             allStr = allStr.substring(0, allStr.length-4);
+            if(allStr.length == 0)
+            {
+                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
             const selectAreaQueryWithDeadline = `SELECT postIdx, areaName FROM postAreaCategory
             AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
