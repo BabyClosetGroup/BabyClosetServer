@@ -129,7 +129,7 @@ module.exports = {
             }
             const filteredDeadlinePost = getDeadLinePost.map(post => {
                 if(post.postTitle.length > 8)
-                    post.postTitle = post.postTitle.substring(0, 8) + "..";
+                    post.postTitle = post.postTitle.substring(0, 6) + "..";
                 post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
                 return post
             })
