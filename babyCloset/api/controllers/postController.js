@@ -399,23 +399,21 @@ module.exports = {
         }
         else
         {
+            let deadLineStr = "";
             for(i=0; i<getFilteredPost.length; i++)
             {
-                const selectAreaQueryWithFilter = `SELECT areaName FROM postAreaCategory
-                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
-                `
-                const selectAreaResultWithFilter = await db.queryParam_Arr(selectAreaQueryWithFilter ,getFilteredPost[i].postIdx);
-                if(!selectAreaResultWithFilter)
-                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-                else
-                {
-                    let areaArray = [];
-                    for(j=0; j<selectAreaResultWithFilter.length ;j++)
-                    {
-                        areaArray.push(selectAreaResultWithFilter[j].areaName);
-                    }
-                    getFilteredPost[i].areaName = areaArray;
-                }
+                deadLineStr = deadLineStr + `postIdx = ${getFilteredPost[i].postIdx} OR `;
+            }
+            deadLineStr = deadLineStr.substring(0, deadLineStr.length-4);
+            const selectAreaQueryWithFilter = `SELECT postIdx, areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE (`+ deadLineStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResultWithFilter = await db.queryParam_None(selectAreaQueryWithFilter);
+            if(!selectAreaResultWithFilter)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                matchAreaWithPost(selectAreaResultWithFilter, getFilteredPost);
             }
             let newMessage = 0; 
             if(confirmNewMessage.length != 0)
