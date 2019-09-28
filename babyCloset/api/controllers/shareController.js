@@ -56,7 +56,6 @@ module.exports = {
     PostShare : async(req, res) => {
         const userIdx = req.decoded.userIdx;
         const postIdx = req.body.postIdx;
-        console.log(userIdx)
         if(!postIdx)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
@@ -83,23 +82,25 @@ module.exports = {
         }
         else
         {
+            let allStr = "";
             for(i=0; i<getUncompletedResult.length; i++)
             {
-                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
-                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
-                `
-                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, getUncompletedResult[i].postIdx);
-                if(!selectAreaResult)
-                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-                else
-                {
-                    let areaArray = [];
-                    for(j=0; j<selectAreaResult.length ;j++)
-                    {
-                        areaArray.push(selectAreaResult[j].areaName);
-                    }
-                    getUncompletedResult[i].areaName = areaArray;
-                }
+                allStr = allStr + `postIdx = ${getUncompletedResult[i].postIdx} OR `;
+            }
+            allStr = allStr.substring(0, allStr.length-4);
+            if(allStr.length == 0)
+            {
+                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
+            const selectAreaQuery = `SELECT postIdx, areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResult = await db.queryParam_None(selectAreaQuery);
+            if(!selectAreaResult)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                matchAreaWithPost(selectAreaResult, getUncompletedResult);
             }
             const filteredPost = getUncompletedResult.map(post => {
                 post.registerNumber = post.registerNumber+'명';
@@ -121,23 +122,25 @@ module.exports = {
         }
         else
         {
+            let allStr = "";
             for(i=0; i<getPostResult.length; i++)
             {
-                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
-                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
-                `
-                const selectAreaResult = await db.queryParam_Arr(selectAreaQuery, getPostResult[i].postIdx);
-                if(!selectAreaResult)
-                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('신청자')));
-                else
-                {
-                    let areaArray = [];
-                    for(j=0; j<selectAreaResult.length ;j++)
-                    {
-                        areaArray.push(selectAreaResult[j].areaName);
-                    }
-                    getPostResult[i].areaName = areaArray;
-                }
+                allStr = allStr + `postIdx = ${getPostResult[i].postIdx} OR `;
+            }
+            allStr = allStr.substring(0, allStr.length-4);
+            if(allStr.length == 0)
+            {
+                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+            }
+            const selectAreaQuery = `SELECT postIdx, areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResult = await db.queryParam_None(selectAreaQuery);
+            if(!selectAreaResult)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                matchAreaWithPost(selectAreaResult, getPostResult);
             }
             const filteredPostResult = getPostResult.map(e => {
                 e.applicantNumber = e.applicantNumber+"명";
@@ -215,7 +218,6 @@ module.exports = {
             AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
             `
             const selectAreaResult = await db.queryParam_None(selectAreaQuery);
-            console.log(selectAreaQuery);
             if(!selectAreaResult)
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
             else
