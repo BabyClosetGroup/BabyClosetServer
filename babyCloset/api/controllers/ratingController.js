@@ -68,5 +68,22 @@ module.exports = {
             res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('별점'),
             filteredRatingResult[0]));
         }
+    },
+    GetRatingIOS:  async(req, res) => {
+        const userIdx = req.params.userIdx;
+        const getRatingResult = await ratingAccessObject.GetRating(userIdx);
+        const filteredRatingResult = getRatingResult.map(e => {
+            e.rating = Math.round(e.rating);
+            return e;
+        })
+        if (!getRatingResult)
+        {
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('별점')));
+        }
+        else
+        {
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('별점'),
+            filteredRatingResult[0]));
+        }
     }
 }
