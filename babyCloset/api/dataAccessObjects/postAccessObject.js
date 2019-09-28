@@ -94,21 +94,18 @@ module.exports = {
             });
         return {result: insertTransaction, postIdx};
     },
-    GetDeadLinePost : async () => {
+    GetMainPost : async () => {
         const selectDeadlinePostQuery = `
         SELECT postIdx, postTitle, deadline, mainImage FROM post
         WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
-        ORDER BY deadline, postIdx DESC LIMIT 3`;
+        ORDER BY deadline ASC, postIdx DESC LIMIT 3`;
         const selectDeadlinePostResult = await db.queryParam_None(selectDeadlinePostQuery);
-        return selectDeadlinePostResult;
-    },
-    GetRecentPost : async () => {
         const selectRecentPostQuery = `
         SELECT postIdx, postTitle, deadline, mainImage FROM post
         WHERE deadline <= curdate() + interval 5 day AND deadline > curdate() - interval 1 day
         ORDER BY createdTime DESC, postIdx DESC LIMIT 4`;
         const selectRecentPostResult = await db.queryParam_None(selectRecentPostQuery);
-        return selectRecentPostResult;
+        return {result1 : selectDeadlinePostResult, result2: selectRecentPostResult};
     },
     GetAllPost : async(offset) => {
         const selectAllPostQuery = `

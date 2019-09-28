@@ -9,6 +9,40 @@ const qrcodeGenerator = require('../../modules/utils/qrcodeGenerator');
 const db = require('../../modules/utils/db/pool');
 require('events').EventEmitter.defaultMaxListeners = 25;
 
+const matchAreaWithPost = (selectAreaResult, getPost) => {
+    var num = 0;
+    let arr = [];
+    do
+    {
+        let tmpArr = [];
+        tmpArr.push(selectAreaResult[num]);
+        while(num<selectAreaResult.length-1 &&
+            selectAreaResult[num].postIdx == selectAreaResult[num+1].postIdx)
+        {
+            tmpArr.push(selectAreaResult[num+1]);
+            num++;
+        }
+        arr.push(tmpArr);
+        num++;
+    } while(num<selectAreaResult.length);
+    for(k=0; k<getPost.length ;k++)
+    {
+        for(i=0; i<arr.length;i++)
+        {
+            if(getPost[k].postIdx == arr[i][0].postIdx)
+            {
+                let areaArray = [];
+                for(j=0; j<arr[i].length ;j++)
+                {
+                    areaArray.push(arr[i][j].areaName);
+                }
+                getPost[k].areaName = areaArray;
+                break;
+            }
+        }
+    }
+}
+
 const ratingFilter =  (rating) => {
     const floor = (rating-Math.floor(rating));
     if(0 <= floor && floor < 0.5)
@@ -65,9 +99,10 @@ module.exports = {
     },
     GetMainPost : async(req, res) => {
         const confirmNewMessage = await noteAccessObject.ConfirmNewMessage(req.decoded.userIdx);
-        const getDeadLinePost = await postAccessObject.GetDeadLinePost();
-        const getRecentPost = await postAccessObject.GetRecentPost();
-        if(!getDeadLinePost || !getRecentPost || !confirmNewMessage)
+        const getMainPosts = await postAccessObject.GetMainPost();
+        const getDeadLinePost = getMainPosts.result1;
+        const getRecentPost = getMainPosts.result2;
+        if(!getMainPosts.result1 || !getMainPosts.result2 || !confirmNewMessage)
         {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
@@ -76,23 +111,21 @@ module.exports = {
             let newMessage = 0; 
             if(confirmNewMessage.length != 0)
                 newMessage = 1;
+            let deadLineStr = "";
             for(i=0; i<getDeadLinePost.length; i++)
             {
-                const selectAreaQueryWithDeadline = `SELECT areaName FROM postAreaCategory
-                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
-                `
-                const selectAreaResultWithDeadline = await db.queryParam_Arr(selectAreaQueryWithDeadline ,getDeadLinePost[i].postIdx);
-                if(!selectAreaResultWithDeadline)
-                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-                else
-                {
-                    let areaArray = [];
-                    for(j=0; j<selectAreaResultWithDeadline.length ;j++)
-                    {
-                        areaArray.push(selectAreaResultWithDeadline[j].areaName);
-                    }
-                    getDeadLinePost[i].areaName = areaArray;
-                }
+                deadLineStr = deadLineStr + `postIdx = ${getDeadLinePost[i].postIdx} OR `;
+            }
+            deadLineStr = deadLineStr.substring(0, deadLineStr.length-4);
+            const selectAreaQueryWithDeadline = `SELECT postIdx, areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE (`+ deadLineStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResultWithDeadline = await db.queryParam_None(selectAreaQueryWithDeadline);
+            if(!selectAreaResultWithDeadline)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                matchAreaWithPost(selectAreaResultWithDeadline, getDeadLinePost);
             }
             const filteredDeadlinePost = getDeadLinePost.map(post => {
                 if(post.postTitle.length > 8)
@@ -100,26 +133,23 @@ module.exports = {
                 post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
                 return post
             })
+
+            let recentStr = "";
             for(i=0; i<getRecentPost.length; i++)
             {
-                const selectAreaQuery = `SELECT areaName FROM postAreaCategory
-                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
-                `
-                const selectAreaResultWithRecent = await db.queryParam_Arr(selectAreaQuery ,getRecentPost[i].postIdx);
-                if(!selectAreaResultWithRecent)
-                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-                else
-                {
-                    console.log(selectAreaResultWithRecent)
-                    let areaArrayWithRecent = [];
-                    for(j=0; j<selectAreaResultWithRecent.length ;j++)
-                    {
-                        areaArrayWithRecent.push(selectAreaResultWithRecent[j].areaName);
-                    }
-                    getRecentPost[i].areaName = areaArrayWithRecent;
-                }
+                recentStr = recentStr + `postIdx = ${getRecentPost[i].postIdx} OR `;
             }
-
+            recentStr = recentStr.substring(0, recentStr.length-4);
+            const selectAreaQuery = `SELECT postIdx, areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE (`+ recentStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResultWithRecent = await db.queryParam_None(selectAreaQuery);
+            if(!selectAreaResultWithRecent)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                matchAreaWithPost(selectAreaResultWithRecent, getRecentPost);
+            }            
             const filteredRecentPost = getRecentPost.map(post => {
                 if(post.postTitle.length > 11)
                     post.postTitle = post.postTitle.substring(0, 11) + "..";    
@@ -142,28 +172,26 @@ module.exports = {
             res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
         }
         else
-        {
-            for(i=0; i<getAllPost.length; i++)
-            {
-                const selectAreaQueryWithAll = `SELECT areaName FROM postAreaCategory
-                AS pac JOIN areaCategory AS ac WHERE postIdx = ? AND pac.areaCategoryIdx = ac.areaCategoryIdx
-                `
-                const selectAreaResultWithAll = await db.queryParam_Arr(selectAreaQueryWithAll ,getAllPost[i].postIdx);
-                if(!selectAreaResultWithAll)
-                    res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-                else
-                {
-                    let areaArray = [];
-                    for(j=0; j<selectAreaResultWithAll.length ;j++)
-                    {
-                        areaArray.push(selectAreaResultWithAll[j].areaName);
-                    }
-                    getAllPost[i].areaName = areaArray;
-                }
-            }
+        {  
             let newMessage = 0; 
             if(confirmNewMessage.length != 0)
                 newMessage = 1;
+            let allStr = "";
+            for(i=0; i<getAllPost.length; i++)
+            {
+                allStr = allStr + `postIdx = ${getAllPost[i].postIdx} OR `;
+            }
+            allStr = allStr.substring(0, allStr.length-4);
+            const selectAreaQueryWithAll = `SELECT postIdx, areaName FROM postAreaCategory
+            AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+            `
+            const selectAreaResultWithAll = await db.queryParam_None(selectAreaQueryWithAll);
+            if(!selectAreaResultWithAll)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+            else
+            {
+                matchAreaWithPost(selectAreaResultWithAll, getAllPost);
+            }
             const filteredAllPost = getAllPost.map(post => {
                 if(post.postTitle.length > 12)
                     post.postTitle = post.postTitle.substring(0, 12) + "..";
