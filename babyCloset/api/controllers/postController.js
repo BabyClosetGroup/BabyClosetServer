@@ -322,34 +322,32 @@ module.exports = {
                     clothArray.push(selectClothResultWithDetail[j].clothName);
                 }
                 getDetailPost[0].clothName = clothArray;
+                let newMessage = 0; 
+                if(confirmNewMessage.length != 0)
+                    newMessage = 1;
+                const filteredDetailPost = getDetailPost.map(post => {
+                    post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
+                    return post
+                })
+                let images = [] 
+                for(i=0; i<getUserAndImages.length; i++)
+                    images.push(getUserAndImages[i].postImage)
+                const ResData = filteredDetailPost[0];
+                ResData.nickname = getUserAndImages[0].nickname;
+                ResData.userIdx = getUserAndImages[0].userIdx;
+                ResData.profileImage =  getUserAndImages[0].profileImage;
+                ResData.rating = ratingFilter(getUserAndImages[0].rating);
+                if(req.decoded.userIdx == getUserAndImages[0].userIdx)
+                    ResData.isSender = 1;
+                else
+                    ResData.isSender = 0;
+                ResData.postImages = images;
+                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+                {
+                    isNewMessage: newMessage,
+                    detailPost : ResData
+                }));
             }
-
-
-            let newMessage = 0; 
-            if(confirmNewMessage.length != 0)
-                newMessage = 1;
-            const filteredDetailPost = getDetailPost.map(post => {
-                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
-                return post
-            })
-            let images = [] 
-            for(i=0; i<getUserAndImages.length; i++)
-                images.push(getUserAndImages[i].postImage)
-            const ResData = filteredDetailPost[0];
-            ResData.nickname = getUserAndImages[0].nickname;
-            ResData.userIdx = getUserAndImages[0].userIdx;
-            ResData.profileImage =  getUserAndImages[0].profileImage;
-            ResData.rating = ratingFilter(getUserAndImages[0].rating);
-            if(req.decoded.userIdx == getUserAndImages[0].userIdx)
-                ResData.isSender = 1;
-            else
-                ResData.isSender = 0;
-            ResData.postImages = images;
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
-            {
-                isNewMessage: newMessage,
-                detailPost : ResData
-            }));
         }
     },
     GetFilteredAllPost: async(req, res) => {
@@ -548,7 +546,7 @@ module.exports = {
             `
             const selectAreaResultWithDeadline = await db.queryParam_None(selectAreaQueryWithDeadline);
             if(!selectAreaResultWithDeadline)
-            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
             else
             {
                 matchAreaWithPost(selectAreaResultWithDeadline, getSearchPost);
