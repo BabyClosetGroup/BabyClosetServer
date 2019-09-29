@@ -552,21 +552,21 @@ module.exports = {
             else
             {
                 matchAreaWithPost(selectAreaResultWithDeadline, getSearchPost);
+                let newMessage = 0; 
+                if(confirmNewMessage.length != 0)
+                    newMessage = 1;
+                const filteredDeadlinePost = getSearchPost.map(post => {
+                    if(post.postTitle.length > 12)
+                        post.postTitle = post.postTitle.substring(0, 12) + "..";
+                    post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
+                    return post
+                })
+                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+                {
+                    isNewMessage: newMessage,
+                    allPost : filteredDeadlinePost
+                }));
             }
-            let newMessage = 0; 
-            if(confirmNewMessage.length != 0)
-                newMessage = 1;
-            const filteredDeadlinePost = getSearchPost.map(post => {
-                if(post.postTitle.length > 12)
-                    post.postTitle = post.postTitle.substring(0, 12) + "..";
-                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
-                return post
-            })
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
-            {
-                isNewMessage: newMessage,
-                allPost : filteredDeadlinePost
-            }));
         }
     }
 }  
