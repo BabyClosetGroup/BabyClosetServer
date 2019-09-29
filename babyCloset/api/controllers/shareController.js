@@ -62,14 +62,29 @@ module.exports = {
         }
         else
         {
-            const postShareResult = shareAccessObject.PostShare(postIdx, userIdx);
-            if (!postShareResult)
+            const checkQuery = `SELECT * FROM sharingWant where postIdx = ? AND applicantIdx = ?`;
+            const checkResult = await db.queryParam_Arr(checkQuery, [postIdx, userIdx]);
+            if(!checkResult)
             {
                 res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('나눔')));
             }
             else
             {
-                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('나눔')));
+                console.log(checkResult);
+                if(checkResult.length == 1)
+                    res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.ALREADY_X('나눔 신청')));
+                else
+                {
+                    const postShareResult = shareAccessObject.PostShare(postIdx, userIdx);
+                    if (!postShareResult)
+                    {
+                        res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_CREATED_X('나눔')));
+                    }
+                    else
+                    {
+                        res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.CREATED_X('나눔')));
+                }
+                }
             }
         }
     },
