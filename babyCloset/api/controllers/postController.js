@@ -359,45 +359,48 @@ module.exports = {
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
-        let getFilteredPost = await postAccessObject.GetFilteredAllPost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
-        if(!getFilteredPost || !confirmNewMessage)
-        {
-            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-        }
         else
         {
-            let allStr = "";
-            for(i=0; i<getFilteredPost.length; i++)
+            let getFilteredPost = await postAccessObject.GetFilteredAllPost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
+            if(!getFilteredPost || !confirmNewMessage)
             {
-                allStr = allStr + `postIdx = ${getFilteredPost[i].postIdx} OR `;
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
             }
-            allStr = allStr.substring(0, allStr.length-4);
-            if(allStr.length == 0)
-            {
-                allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
-            }
-            const selectAreaQueryWithFilter = `SELECT postIdx, areaName FROM postAreaCategory
-            AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
-            `
-            const selectAreaResultWithFilter = await db.queryParam_None(selectAreaQueryWithFilter);
-            if(!selectAreaResultWithFilter)
-            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
             else
             {
-                matchAreaWithPost(selectAreaResultWithFilter, getFilteredPost);
-                let newMessage = 0; 
-                if(confirmNewMessage.length != 0)
-                    newMessage = 1;
-                getFilteredPost = getFilteredPost.map(post => {
-                    if(post.postTitle.length > 12)
-                        post.postTitle = post.postTitle.substring(0, 12) + "..";
-                    return post
-                })
-                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+                let allStr = "";
+                for(i=0; i<getFilteredPost.length; i++)
                 {
-                    isNewMessage: newMessage,
-                    filteredAllPost : getFilteredPost
-                }));
+                    allStr = allStr + `postIdx = ${getFilteredPost[i].postIdx} OR `;
+                }
+                allStr = allStr.substring(0, allStr.length-4);
+                if(allStr.length == 0)
+                {
+                    allStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+                }
+                const selectAreaQueryWithFilter = `SELECT postIdx, areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE (`+ allStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResultWithFilter = await db.queryParam_None(selectAreaQueryWithFilter);
+                if(!selectAreaResultWithFilter)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    matchAreaWithPost(selectAreaResultWithFilter, getFilteredPost);
+                    let newMessage = 0; 
+                    if(confirmNewMessage.length != 0)
+                        newMessage = 1;
+                    getFilteredPost = getFilteredPost.map(post => {
+                        if(post.postTitle.length > 12)
+                            post.postTitle = post.postTitle.substring(0, 12) + "..";
+                        return post
+                    })
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+                    {
+                        isNewMessage: newMessage,
+                        filteredAllPost : getFilteredPost
+                    }));
+                }
             }
         }
     },
@@ -410,46 +413,49 @@ module.exports = {
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
         }
-        let getFilteredPost = await postAccessObject.GetFilteredDeadlinePost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
-        if(!getFilteredPost || !confirmNewMessage)
-        {
-            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
-        }
         else
         {
-            let deadLineStr = "";
-            for(i=0; i<getFilteredPost.length; i++)
+            let getFilteredPost = await postAccessObject.GetFilteredDeadlinePost(area, age, cloth, (parseInt(req.params.pagination)-1)*8);
+            if(!getFilteredPost || !confirmNewMessage)
             {
-                deadLineStr = deadLineStr + `postIdx = ${getFilteredPost[i].postIdx} OR `;
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
             }
-            deadLineStr = deadLineStr.substring(0, deadLineStr.length-4);
-            if(deadLineStr.length == 0)
-            {
-                deadLineStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
-            }
-            const selectAreaQueryWithFilter = `SELECT postIdx, areaName FROM postAreaCategory
-            AS pac JOIN areaCategory AS ac WHERE (`+ deadLineStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
-            `
-            const selectAreaResultWithFilter = await db.queryParam_None(selectAreaQueryWithFilter);
-            if(!selectAreaResultWithFilter)
-            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
             else
             {
-                matchAreaWithPost(selectAreaResultWithFilter, getFilteredPost);
-                let newMessage = 0; 
-                if(confirmNewMessage.length != 0)
-                    newMessage = 1;
-                getFilteredPost = getFilteredPost.map(post => {
-                    if(post.postTitle.length > 12)
-                        post.postTitle = post.postTitle.substring(0, 12) + "..";
-                    post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
-                    return post
-                })
-                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+                let deadLineStr = "";
+                for(i=0; i<getFilteredPost.length; i++)
                 {
-                    isNewMessage: newMessage,
-                    filteredDeadlinePost : getFilteredPost
-                }));
+                    deadLineStr = deadLineStr + `postIdx = ${getFilteredPost[i].postIdx} OR `;
+                }
+                deadLineStr = deadLineStr.substring(0, deadLineStr.length-4);
+                if(deadLineStr.length == 0)
+                {
+                    deadLineStr = 'pac.areaCategoryIdx = ac.areaCategoryIdx';
+                }
+                const selectAreaQueryWithFilter = `SELECT postIdx, areaName FROM postAreaCategory
+                AS pac JOIN areaCategory AS ac WHERE (`+ deadLineStr +`) AND pac.areaCategoryIdx = ac.areaCategoryIdx
+                `
+                const selectAreaResultWithFilter = await db.queryParam_None(selectAreaQueryWithFilter);
+                if(!selectAreaResultWithFilter)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('게시물')));
+                else
+                {
+                    matchAreaWithPost(selectAreaResultWithFilter, getFilteredPost);
+                    let newMessage = 0; 
+                    if(confirmNewMessage.length != 0)
+                        newMessage = 1;
+                    getFilteredPost = getFilteredPost.map(post => {
+                        if(post.postTitle.length > 12)
+                            post.postTitle = post.postTitle.substring(0, 12) + "..";
+                        post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
+                        return post
+                    })
+                    res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+                    {
+                        isNewMessage: newMessage,
+                        filteredDeadlinePost : getFilteredPost
+                    }));
+                }
             }
         }
     },
