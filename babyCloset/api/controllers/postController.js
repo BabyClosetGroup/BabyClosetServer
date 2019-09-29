@@ -387,20 +387,20 @@ module.exports = {
             else
             {
                 matchAreaWithPost(selectAreaResultWithFilter, getFilteredPost);
+                let newMessage = 0; 
+                if(confirmNewMessage.length != 0)
+                    newMessage = 1;
+                getFilteredPost = getFilteredPost.map(post => {
+                    if(post.postTitle.length > 12)
+                        post.postTitle = post.postTitle.substring(0, 12) + "..";
+                    return post
+                })
+                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+                {
+                    isNewMessage: newMessage,
+                    filteredAllPost : getFilteredPost
+                }));
             }
-            let newMessage = 0; 
-            if(confirmNewMessage.length != 0)
-                newMessage = 1;
-            getFilteredPost = getFilteredPost.map(post => {
-                if(post.postTitle.length > 12)
-                    post.postTitle = post.postTitle.substring(0, 12) + "..";
-                return post
-            })
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
-            {
-                isNewMessage: newMessage,
-                filteredAllPost : getFilteredPost
-            }));
         }
     },
     GetFilteredDeadlinePost: async(req, res) => {
@@ -438,21 +438,21 @@ module.exports = {
             else
             {
                 matchAreaWithPost(selectAreaResultWithFilter, getFilteredPost);
+                let newMessage = 0; 
+                if(confirmNewMessage.length != 0)
+                    newMessage = 1;
+                getFilteredPost = getFilteredPost.map(post => {
+                    if(post.postTitle.length > 12)
+                        post.postTitle = post.postTitle.substring(0, 12) + "..";
+                    post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
+                    return post
+                })
+                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
+                {
+                    isNewMessage: newMessage,
+                    filteredDeadlinePost : getFilteredPost
+                }));
             }
-            let newMessage = 0; 
-            if(confirmNewMessage.length != 0)
-                newMessage = 1;
-            getFilteredPost = getFilteredPost.map(post => {
-                if(post.postTitle.length > 12)
-                    post.postTitle = post.postTitle.substring(0, 12) + "..";
-                post.deadline = 'D-'+ moment.duration(moment(post.deadline, 'YYYY-MM-DD').add(1, 'days').diff(moment(), 'days'));
-                return post
-            })
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('게시물'),
-            {
-                isNewMessage: newMessage,
-                filteredDeadlinePost : getFilteredPost
-            }));
         }
     },
     UpdatePost: async(req, res) => {
