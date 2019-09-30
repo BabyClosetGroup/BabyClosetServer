@@ -89,7 +89,6 @@ module.exports = {
         else
         {
             console.log(userIdx)
-            console.log('xx', getNotes)
             for(i=0; i<getNotes.length ;i++)
             {
                 let counterpartIdx;
@@ -97,7 +96,6 @@ module.exports = {
                     counterpartIdx = getNotes[i].youngerUserIdx;
                 else
                     counterpartIdx = getNotes[i].olderUserIdx;
-                console.log('??',counterpartIdx);
                 const cnt = await noteAccessObject.GetUnreadNotesCount(counterpartIdx, userIdx);
                 const getUserNickname = 'SELECT nickname FROM user WHERE userIdx = ?';
                 const result = await db.queryParam_Arr(getUserNickname, [counterpartIdx]);

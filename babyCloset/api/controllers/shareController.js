@@ -72,7 +72,7 @@ module.exports = {
             {
                 console.log(checkResult);
                 if(checkResult.length == 1)
-                    res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.ALREADY_X('나눔 신청')));
+                    res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, "이미 나눔 신청하셨습니다"));
                 else
                 {
                     const postShareResult = shareAccessObject.PostShare(postIdx, userIdx);

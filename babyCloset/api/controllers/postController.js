@@ -7,7 +7,7 @@ const qrCodeAccessObject = require('../dataAccessObjects/qrCodeAccessObject');
 const moment = require('moment');
 const qrcodeGenerator = require('../../modules/utils/qrcodeGenerator');
 const db = require('../../modules/utils/db/pool');
-require('events').EventEmitter.defaultMaxListeners = 25;
+require('events').EventEmitter.defaultMaxListeners = 100;
 
 const matchAreaWithPost = (selectAreaResult, getPost) => {
     var num = 0;
