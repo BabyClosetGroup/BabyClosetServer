@@ -67,9 +67,9 @@ module.exports = {
         (SELECT noteIdx, noteContent, senderIdx, receiverIdx, createdTime
         FROM note
         WHERE (senderIdx = ? and receiverIdx= ?) OR (senderIdx = ? and receiverIdx = ?)
-        ORDER BY createdTime DESC)
+        )
         AS filteredNote 
-        WHERE user.userIdx = filteredNote.receiverIdx`;
+        WHERE user.userIdx = filteredNote.receiverIdx ORDER BY filteredNote.noteIdx ASC`;
         const getNotes = await db.queryParam_Arr(getNotesQuery, [loggedInUser, counterpart, counterpart, loggedInUser]);
         return getNotes;
     },
@@ -85,7 +85,7 @@ module.exports = {
     },
     GetNoteWithAllUsers : async(userIdx) => {
         const selectNotes = `SELECT olderUserIdx, youngerUserIdx, lastContent, createdTime FROM noteManagement
-        WHERE olderUserIdx = ? OR youngerUserIdx = ?`;
+        WHERE olderUserIdx = ? OR youngerUserIdx = ? ORDER BY createdTime DESC`;
         const selectNotesResult = await db.queryParam_Arr(selectNotes, [userIdx, userIdx]);
         return selectNotesResult;
     },
@@ -100,4 +100,3 @@ module.exports = {
         return confirmNewMessageResult;
     }
 }
-

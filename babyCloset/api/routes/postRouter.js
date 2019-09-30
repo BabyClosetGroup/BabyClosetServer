@@ -9,6 +9,7 @@ router.get('/all/:pagination', authUtil.isLoggedIn, PostController.GetAllPost);
 router.get('/deadline/:pagination', authUtil.isLoggedIn, PostController.GetDeadlinePost);
 router.get('/qrcode', authUtil.isLoggedIn, PostController.SelectPostForQRCode);
 router.get('/:postIdx', authUtil.isLoggedIn, PostController.GetPostDetail);
+router.post('/search/:pagination', authUtil.isLoggedIn, PostController.SearchPost);
 router.post('/filter/all/:pagination', authUtil.isLoggedIn, PostController.GetFilteredAllPost);
 router.post('/filter/deadline/:pagination', authUtil.isLoggedIn, PostController.GetFilteredDeadlinePost);
 router.post('/', upload.array('postImages'), authUtil.isLoggedIn, PostController.RegisterPost);

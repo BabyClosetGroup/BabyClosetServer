@@ -10,6 +10,7 @@ const jwt = require('../../modules/utils/security/jwt');
 module.exports = {
     SignUp: async(req, res) => {
         let duplicate = false;
+
         if(!req.body.userId || !req.body.name || !req.body.password || !req.body.nickname)
         {
             res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
@@ -58,7 +59,9 @@ module.exports = {
     },
     SignIn: async(req, res) => {
         try{
-            const getUserWithSameIdQuery = 'SELECT userIdx, userId, username, salt, password, nickname FROM user WHERE userId = ?';
+            if(!req.body.userId || !req.body.password)
+                res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.NULL_VALUE));
+            const getUserWithSameIdQuery = 'SELECT userIdx, userId, username, salt, password, nickname, profileImage FROM user WHERE userId = ?';
             let resultUser = await db.queryParam_Arr(getUserWithSameIdQuery, [req.body.userId] );
             if(resultUser.length == 0)
             {
@@ -79,6 +82,7 @@ module.exports = {
                         userId: resultUser[0].userId,
                         name: resultUser[0].username,
                         nickname: resultUser[0].nickname,
+                        profileImage: resultUser[0].profileImage,
                         token
                     }
                     res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.LOGIN_SUCCESS, responseData));
@@ -95,22 +99,21 @@ module.exports = {
     },
     //이름, 아이디, 비밀번호, 닉네임, 프로필 사진
     UpdateProfile: async(req, res) => {
-        const userId = req.body.userId;
-        const username = req.body.username;
         let password = req.body.password;
         const nickname = req.body.nickname;
         const profileImage = req.file;
         const userIdx = req.decoded.userIdx;
-        const updateUserIdQuery = 'UPDATE user SET userId = ? WHERE user.userIdx = ?';
-        const updateUsernameQuery = 'UPDATE user SET username = ? WHERE user.userIdx = ?';
         const updatePasswordQuery = 'UPDATE user SET password = ?, salt = ? WHERE user.userIdx = ?';
         const updateNicknameQuery = 'UPDATE user SET nickname = ? WHERE user.userIdx = ?';
         const updateProfileImageQuery = 'UPDATE user SET profileImage = ? WHERE user.userIdx = ?';
+        const checkNickname = 'SELECT userIdx FROM user WHERE nickname = ?';
+        const checkNicknameResult = await db.queryParam_Arr(checkNickname, [nickname]);
+        console.log(profileImage)
+        if(!checkNicknameResult)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
+        else if(checkNicknameResult.length != 0)
+            res.status(200).send(resForm.successFalse(statusCode.BAD_REQUEST, resMessage.ALREADY_X('유저 닉네임')));
         const updateTransaction = await db.Transaction(async(connection) => {
-            if(userId)
-                await connection.query(updateUserIdQuery, [userId, userIdx]);
-            if(username)
-                await connection.query(updateUsernameQuery, [username, userIdx]);
             if(password)
             {
                 const salt = await crypto.randomBytes(32);
@@ -120,12 +123,44 @@ module.exports = {
             if(nickname)
                 await connection.query(updateNicknameQuery, [nickname, userIdx]);
             if(profileImage)
+            {
                 await connection.query(updateProfileImageQuery, [profileImage.location, userIdx]);
+            }
         })
+        console.log(updateTransaction)
         if (!updateTransaction) {
-            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('게시물')));
-            } else {
-            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('게시물')));
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
+            } else {    
+            const selectUserProfileQuery = 'SELECT userIdx, userId, username, nickname, profileImage FROM user where userIdx = ?';
+            const resultUser = await db.queryParam_Arr(selectUserProfileQuery, [userIdx]);
+            if(!resultUser)
+                res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_UPDATED_X('유저')));
+            else
+            {
+                const User = {
+                    userIdx: resultUser[0].userIdx,
+                    nickname: resultUser[0].nickname
+                }
+                const token = jwt.sign(User).accessToken
+                const responseData = {
+                    userIdx: resultUser[0].userIdx,
+                    userId: resultUser[0].userId,
+                    username: resultUser[0].username,
+                    nickname: resultUser[0].nickname,
+                    profileImage: resultUser[0].profileImage,
+                    token
+                }
+                res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.UPDATED_X('유저'), responseData));
+            }
         }
+    },
+    getUser: async(req, res) => {
+        const userIdx = req.decoded.userIdx;
+        const getUserQuery = 'SELECT userIdx, userId, username, nickname, profileImage FROM user WHERE userIdx = ?';
+        const getUserResult = await db.queryParam_Arr(getUserQuery, [userIdx]);
+        if(!getUserResult)
+            res.status(200).send(resForm.successFalse(statusCode.DB_ERROR, resMessage.FAIL_READ_X('유저')));
+        else
+            res.status(200).send(resForm.successTrue(statusCode.OK, resMessage.READ_X('유저'), getUserResult[0]));
     }
 }
